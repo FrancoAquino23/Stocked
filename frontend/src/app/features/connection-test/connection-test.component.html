@@ -1,0 +1,27 @@
+<!-- TEMP: Verificar la conectividad Postgres <-> API <-> Angular -->
+<main class="connection-test">
+  <h1>Stocked — prueba de conexión</h1>
+  <p>Backend (.NET + Postgres) ⇄ Frontend (Angular)</p>
+
+  @if (state === 'loading') {
+    <p role="status">Cargando usuarios…</p>
+  }
+
+  @if (state === 'error') {
+    <p role="alert" class="connection-test__error">
+      No se pudo conectar con la API — verifica que el backend y Postgres estén corriendo.
+    </p>
+  }
+
+  @if (state === 'empty') {
+    <p>La API respondió correctamente, pero no hay usuarios registrados todavía.</p>
+  }
+
+  @if (state === 'success') {
+    <ul>
+      @for (user of users; track user.id) {
+        <li>{{ user.displayName }} — {{ user.email }}</li>
+      }
+    </ul>
+  }
+</main>

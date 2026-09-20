@@ -1,0 +1,6 @@
+@StockedApiHostAddress = http://localhost:5215
+
+GET {{StockedApiHostAddress}}/api/users
+Accept: application/json
+
+###

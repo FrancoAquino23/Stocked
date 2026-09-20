@@ -1,0 +1,16 @@
+# Credenciales de desarrollo local
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: stocked-db
+    environment:
+      POSTGRES_USER: stocked_dev
+      POSTGRES_PASSWORD: stocked_dev_password
+      POSTGRES_DB: stocked
+    ports:
+      - "5432:5432"
+    volumes:
+      - stocked-db-data:/var/lib/postgresql/data
+
+volumes:
+  stocked-db-data:
