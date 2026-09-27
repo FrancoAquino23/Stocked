@@ -35,6 +35,11 @@ public class StockedDbContext : DbContext
             .HasIndex(recipe => recipe.ExternalId)
             .IsUnique();
 
+        // Un ingrediente no puede tener más de una fila en la despensa
+        modelBuilder.Entity<PantryItem>()
+            .HasIndex(pantryItem => pantryItem.IngredientId)
+            .IsUnique();
+
         // Procedimiento de preparación (Pasos)
         modelBuilder.Entity<Recipe>()
             .Property(recipe => recipe.Instructions)

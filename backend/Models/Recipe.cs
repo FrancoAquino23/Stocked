@@ -12,8 +12,14 @@ public class Recipe
     // Procedimiento (Pasos numerados)
     public string Instructions { get; set; } = string.Empty;
 
-    // Etiquetas (Tipo de platillo)
-    public string[] Tags { get; set; } = [];
+    // Tipo de comida
+    public string[] DishTypes { get; set; } = [];
+
+    // Tipo de dieta
+    public string[] Diets { get; set; } = [];
+
+    // Tipo de cocina
+    public string[] Cuisines { get; set; } = [];
 
     public DateTime CachedAt { get; set; }
 

@@ -1,6 +1,6 @@
 namespace Stocked.Api.Models;
 
-// Modelo: Ingrediente
+// Modelo: Ítem de despensa
 public class PantryItem
 {
     public int Id { get; set; }

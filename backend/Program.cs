@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Stocked.Api.Data;
+using Stocked.Api.Repositories;
+using Stocked.Api.Services.Pantry;
+using Stocked.Api.Services.Recipes;
+using Stocked.Api.Services.Spoonacular;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +19,24 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<StockedDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<SpoonacularOptions>(
+    builder.Configuration.GetSection(SpoonacularOptions.SectionName));
+
+builder.Services.AddHttpClient<SpoonacularClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<IOptions<SpoonacularOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("x-api-key", options.ApiKey);
+});
+
+builder.Services.AddScoped<IngredientRepository>();
+builder.Services.AddScoped<RecipeRepository>();
+builder.Services.AddScoped<FavoriteRecipeRepository>();
+builder.Services.AddScoped<PantryRepository>();
+builder.Services.AddScoped<RecipeService>();
+builder.Services.AddScoped<PantryService>();
 
 builder.Services.AddCors(options =>
 {
