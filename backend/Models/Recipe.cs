@@ -23,5 +23,8 @@ public class Recipe
 
     public DateTime CachedAt { get; set; }
 
+    // Última vez que se consultó el detalle, alimenta la pestaña "Recientes"
+    public DateTime? LastViewedAt { get; set; }
+
     public ICollection<RecipeIngredient> RecipeIngredients { get; set; } = [];
 }

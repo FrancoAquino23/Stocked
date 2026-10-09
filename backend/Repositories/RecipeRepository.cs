@@ -29,4 +29,21 @@ public class RecipeRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
         return recipe;
     }
+
+    // Listar las recetas vistas recientemente
+    public Task<List<Recipe>> GetRecentAsync(int maxResults, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Recipes
+            .Include(recipe => recipe.RecipeIngredients)
+                .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
+            .Where(recipe => recipe.LastViewedAt != null)
+            .OrderByDescending(recipe => recipe.LastViewedAt)
+            .Take(maxResults)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task UpdateAsync(Recipe recipe, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

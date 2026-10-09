@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
+using Stocked.Api.Services.Inventory;
 using Stocked.Api.Services.Recipes;
 using Stocked.Api.Services.Spoonacular;
 
@@ -61,20 +62,36 @@ public class RecipeController : ControllerBase
         return NoContent();
     }
 
-    // Listar las recetas favoritas
+    // Listar las recetas favoritas, con indicador de si se pueden cocinar con la despensa actual
     [HttpGet("favorites")]
-    public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> GetFavorites()
+    public async Task<ActionResult<IEnumerable<RecipeWithMatchDto>>> GetFavorites()
     {
         var recipes = await _recipeService.GetFavoriteRecipesAsync();
+        var matches = await _recipeService.GetMatchesAsync(recipes);
 
-        var favorites = recipes.Select(recipe => new RecipeSearchResultDto
+        return Ok(recipes.Select(recipe => MapToMatchDto(recipe, matches[recipe.Id])));
+    }
+
+    // Listar las recetas vistas recientemente, con indicador de si se pueden cocinar
+    [HttpGet("recent")]
+    public async Task<ActionResult<IEnumerable<RecipeWithMatchDto>>> GetRecent()
+    {
+        var recipes = await _recipeService.GetRecentRecipesAsync();
+        var matches = await _recipeService.GetMatchesAsync(recipes);
+
+        return Ok(recipes.Select(recipe => MapToMatchDto(recipe, matches[recipe.Id])));
+    }
+
+    private static RecipeWithMatchDto MapToMatchDto(Recipe recipe, RecipeMatch match)
+    {
+        return new RecipeWithMatchDto
         {
             ExternalId = recipe.ExternalId,
             Name = recipe.Name,
-            ImageUrl = recipe.ImageUrl
-        });
-
-        return Ok(favorites);
+            ImageUrl = recipe.ImageUrl,
+            CanMake = match.CanMake,
+            MissingIngredientsCount = match.MissingIngredientsCount
+        };
     }
 
     private static RecipeDetailDto MapToDetailDto(Recipe recipe, bool isFavorite)

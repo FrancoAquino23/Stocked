@@ -1,40 +1,49 @@
 using System.Text.Json;
 using Stocked.Api.Models;
 using Stocked.Api.Repositories;
+using Stocked.Api.Services.Inventory;
 using Stocked.Api.Services.Spoonacular;
 
 namespace Stocked.Api.Services.Recipes;
 
 public class RecipeService
 {
+    private const int MaxRecentRecipes = 20;
+
     private readonly SpoonacularClient _spoonacularClient;
     private readonly RecipeRepository _recipeRepository;
     private readonly IngredientRepository _ingredientRepository;
     private readonly FavoriteRecipeRepository _favoriteRecipeRepository;
+    private readonly PantryRepository _pantryRepository;
 
     public RecipeService(
         SpoonacularClient spoonacularClient,
         RecipeRepository recipeRepository,
         IngredientRepository ingredientRepository,
-        FavoriteRecipeRepository favoriteRecipeRepository)
+        FavoriteRecipeRepository favoriteRecipeRepository,
+        PantryRepository pantryRepository)
     {
         _spoonacularClient = spoonacularClient;
         _recipeRepository = recipeRepository;
         _ingredientRepository = ingredientRepository;
         _favoriteRecipeRepository = favoriteRecipeRepository;
+        _pantryRepository = pantryRepository;
     }
 
-    // Servir la receta ya guardada en memoria o guardarla por primera vez
+    // Servir la receta ya guardada en memoria o guardarla por primera vez, marcándola como vista
     public async Task<Recipe> GetOrFetchRecipeAsync(int externalId, CancellationToken cancellationToken = default)
     {
         var cachedRecipe = await _recipeRepository.GetByExternalIdAsync(externalId, cancellationToken);
         if (cachedRecipe is not null)
         {
+            cachedRecipe.LastViewedAt = DateTime.UtcNow;
+            await _recipeRepository.UpdateAsync(cachedRecipe, cancellationToken);
             return cachedRecipe;
         }
 
         var detail = await _spoonacularClient.GetRecipeInformationAsync(externalId, cancellationToken);
         var recipe = await MapToRecipeAsync(detail, cancellationToken);
+        recipe.LastViewedAt = DateTime.UtcNow;
 
         return await _recipeRepository.AddAsync(recipe, cancellationToken);
     }
@@ -77,6 +86,24 @@ public class RecipeService
     public Task<List<Recipe>> GetFavoriteRecipesAsync(CancellationToken cancellationToken = default)
     {
         return _favoriteRecipeRepository.GetAllRecipesAsync(cancellationToken);
+    }
+
+    // Listar las recetas vistas recientemente
+    public Task<List<Recipe>> GetRecentRecipesAsync(CancellationToken cancellationToken = default)
+    {
+        return _recipeRepository.GetRecentAsync(MaxRecentRecipes, cancellationToken);
+    }
+
+    // Conocer para cada receta, si se puede cocinar con lo que hay en la despensa
+    public async Task<Dictionary<int, RecipeMatch>> GetMatchesAsync(
+        IEnumerable<Recipe> recipes, CancellationToken cancellationToken = default)
+    {
+        var pantryItems = await _pantryRepository.GetAllAsync(cancellationToken);
+        var pantryIngredientIds = pantryItems.Select(pantryItem => pantryItem.IngredientId).ToHashSet();
+
+        return recipes.ToDictionary(
+            recipe => recipe.Id,
+            recipe => RecipeMatchCalculator.Calculate(recipe, pantryIngredientIds));
     }
 
     // Armar la receta en memoria a partir del detalle de Spoonacular

@@ -20,11 +20,13 @@ public class FavoriteRecipeRepository
             .FirstOrDefaultAsync(favorite => favorite.RecipeId == recipeId, cancellationToken);
     }
 
-    // Obtener las recetas marcadas como favoritas
+    // Obtener las recetas y sus ingredientes marcadas como favoritas
     public Task<List<Recipe>> GetAllRecipesAsync(CancellationToken cancellationToken = default)
     {
         return _dbContext.FavoriteRecipes
             .Include(favorite => favorite.Recipe)
+                .ThenInclude(recipe => recipe.RecipeIngredients)
+                    .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
             .Select(favorite => favorite.Recipe)
             .ToListAsync(cancellationToken);
     }

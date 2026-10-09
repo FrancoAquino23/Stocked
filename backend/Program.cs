@@ -1,8 +1,12 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stocked.Api.Data;
 using Stocked.Api.Repositories;
+using Stocked.Api.Services.Calendar;
+using Stocked.Api.Services.Inventory;
 using Stocked.Api.Services.Pantry;
+using Stocked.Api.Services.Preparations;
 using Stocked.Api.Services.Recipes;
 using Stocked.Api.Services.Spoonacular;
 
@@ -12,7 +16,9 @@ const string AngularDevClientPolicy = "AngularDevClient";
 
 // Registrar los servicios de la aplicación
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // Enums legibles en JSON en vez del valor numérico
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Más información sobre configurar Swagger/OpenAPI: https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,8 +41,14 @@ builder.Services.AddScoped<IngredientRepository>();
 builder.Services.AddScoped<RecipeRepository>();
 builder.Services.AddScoped<FavoriteRecipeRepository>();
 builder.Services.AddScoped<PantryRepository>();
+builder.Services.AddScoped<PantryAdjustmentRepository>();
+builder.Services.AddScoped<RecipePreparationRepository>();
+builder.Services.AddScoped<MealPlanEntryRepository>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PantryService>();
+builder.Services.AddScoped<RecipePreparationService>();
+builder.Services.AddScoped<MealPlanService>();
+builder.Services.AddScoped<ShoppingListService>();
 
 builder.Services.AddCors(options =>
 {

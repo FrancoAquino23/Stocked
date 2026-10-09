@@ -17,6 +17,7 @@ public class StockedDbContext : DbContext
     public DbSet<PantryItem> PantryItems => Set<PantryItem>();
     public DbSet<MealPlanEntry> MealPlanEntries => Set<MealPlanEntry>();
     public DbSet<RecipePreparation> RecipePreparations => Set<RecipePreparation>();
+    public DbSet<PantryAdjustment> PantryAdjustments => Set<PantryAdjustment>();
 
     // Configurar índices, tipos de columna y relaciones del modelo de datos
     protected override void OnModelCreating(ModelBuilder modelBuilder)

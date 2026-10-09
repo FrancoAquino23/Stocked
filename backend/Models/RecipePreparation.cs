@@ -15,8 +15,7 @@ public class RecipePreparation
     // Cantidad de veces que se prepara una receta
     public int Multiplier { get; set; }
 
-    public DateTime StartedAt { get; set; }
-
     // Estado: "Pendiente" / "En curso" / "Terminada"
+    public DateTime? StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
 }
