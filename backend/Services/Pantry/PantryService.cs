@@ -23,32 +23,32 @@ public class PantryService
         _pantryAdjustmentRepository = pantryAdjustmentRepository;
     }
 
-    // Listar toda la despensa
-    public Task<List<PantryItem>> GetAllPantryItemsAsync(CancellationToken cancellationToken = default)
+    // Listar la despensa de un usuario
+    public Task<List<PantryItem>> GetAllPantryItemsAsync(int userId, CancellationToken cancellationToken = default)
     {
-        return _pantryRepository.GetAllAsync(cancellationToken);
+        return _pantryRepository.GetAllAsync(userId, cancellationToken);
     }
 
-    // Agregar un ingrediente a la despensa
-    public async Task<PantryItem> AddPantryItemAsync(int externalId, CancellationToken cancellationToken = default)
+    // Agregar un ingrediente a la despensa de un usuario
+    public async Task<PantryItem> AddPantryItemAsync(int userId, int externalId, CancellationToken cancellationToken = default)
     {
-        var existingPantryItem = await _pantryRepository.GetByExternalIdAsync(externalId, cancellationToken);
+        var existingPantryItem = await _pantryRepository.GetByExternalIdAsync(userId, externalId, cancellationToken);
         if (existingPantryItem is not null)
         {
             return existingPantryItem;
         }
 
         var ingredient = await GetOrFetchIngredientAsync(externalId, cancellationToken);
-        var pantryItem = new PantryItem { IngredientId = ingredient.Id, Ingredient = ingredient };
+        var pantryItem = new PantryItem { UserId = userId, IngredientId = ingredient.Id, Ingredient = ingredient };
 
         return await _pantryRepository.AddAsync(pantryItem, cancellationToken);
     }
 
     // Actualizar la cantidad habitual de compra
     public async Task<PantryItem?> UpdatePantryItemAsync(
-        int externalId, decimal? usualQuantity, string? usualUnit, CancellationToken cancellationToken = default)
+        int userId, int externalId, decimal? usualQuantity, string? usualUnit, CancellationToken cancellationToken = default)
     {
-        var pantryItem = await _pantryRepository.GetByExternalIdAsync(externalId, cancellationToken);
+        var pantryItem = await _pantryRepository.GetByExternalIdAsync(userId, externalId, cancellationToken);
         if (pantryItem is null)
         {
             return null;
@@ -62,9 +62,9 @@ public class PantryService
     }
 
     // Quitar un ingrediente de la despensa
-    public async Task RemovePantryItemAsync(int externalId, CancellationToken cancellationToken = default)
+    public async Task RemovePantryItemAsync(int userId, int externalId, CancellationToken cancellationToken = default)
     {
-        var pantryItem = await _pantryRepository.GetByExternalIdAsync(externalId, cancellationToken);
+        var pantryItem = await _pantryRepository.GetByExternalIdAsync(userId, externalId, cancellationToken);
         if (pantryItem is not null)
         {
             await _pantryRepository.RemoveAsync(pantryItem, cancellationToken);
@@ -73,12 +73,13 @@ public class PantryService
 
     // Reportar que un ingrediente se echó a perder sin haberse usado en ninguna receta
     public async Task<PantryAdjustment> ReportAdjustmentAsync(
-        int externalId, decimal quantity, string unit, PantryAdjustmentReason reason,
+        int userId, int externalId, decimal quantity, string unit, PantryAdjustmentReason reason,
         CancellationToken cancellationToken = default)
     {
         var ingredient = await GetOrFetchIngredientAsync(externalId, cancellationToken);
         var adjustment = new PantryAdjustment
         {
+            UserId = userId,
             IngredientId = ingredient.Id,
             Ingredient = ingredient,
             Quantity = quantity,

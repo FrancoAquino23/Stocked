@@ -21,17 +21,18 @@ public class ShoppingListService
     }
 
     // Calcular la lista de faltantes de la semana
-    public async Task<List<ShoppingListEntry>> CalculateAsync(DateOnly weekStart, CancellationToken cancellationToken = default)
+    public async Task<List<ShoppingListEntry>> CalculateAsync(
+        int userId, DateOnly weekStart, CancellationToken cancellationToken = default)
     {
         var windowStart = DateTime.SpecifyKind(weekStart.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var windowEnd = DateTime.SpecifyKind(weekStart.AddDays(7).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
 
-        var pantryItems = await _pantryRepository.GetAllAsync(cancellationToken);
+        var pantryItems = await _pantryRepository.GetAllAsync(userId, cancellationToken);
         var finishedPreparations = await _recipePreparationRepository
-            .GetFinishedWithinWindowAsync(windowStart, windowEnd, cancellationToken);
-        var unfinishedPreparations = await _recipePreparationRepository.GetUnfinishedAsync(cancellationToken);
+            .GetFinishedWithinWindowAsync(userId, windowStart, windowEnd, cancellationToken);
+        var unfinishedPreparations = await _recipePreparationRepository.GetUnfinishedAsync(userId, cancellationToken);
         var adjustments = await _pantryAdjustmentRepository
-            .GetWithinWindowAsync(windowStart, windowEnd, cancellationToken);
+            .GetWithinWindowAsync(userId, windowStart, windowEnd, cancellationToken);
 
         var consumed = ToIngredientAmounts(finishedPreparations);
         var required = ToIngredientAmounts(unfinishedPreparations);

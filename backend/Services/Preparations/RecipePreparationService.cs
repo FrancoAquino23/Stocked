@@ -17,11 +17,12 @@ public class RecipePreparationService
 
     // Declarar que se va a preparar una receta X veces
     public async Task<RecipePreparation> DeclareAsync(
-        int externalId, int multiplier, int? mealPlanEntryId, CancellationToken cancellationToken = default)
+        int userId, int externalId, int multiplier, int? mealPlanEntryId, CancellationToken cancellationToken = default)
     {
         var recipe = await _recipeService.GetOrFetchRecipeAsync(externalId, cancellationToken);
         var preparation = new RecipePreparation
         {
+            UserId = userId,
             RecipeId = recipe.Id,
             Multiplier = multiplier,
             MealPlanEntryId = mealPlanEntryId
@@ -31,9 +32,9 @@ public class RecipePreparationService
     }
 
     // Marcar que ya se empezó a cocinar, pasa de Pendiente a En curso
-    public async Task<RecipePreparation?> StartAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<RecipePreparation?> StartAsync(int userId, int id, CancellationToken cancellationToken = default)
     {
-        var preparation = await _recipePreparationRepository.GetByIdAsync(id, cancellationToken);
+        var preparation = await _recipePreparationRepository.GetByIdAsync(userId, id, cancellationToken);
         if (preparation is null)
         {
             return null;
@@ -46,9 +47,9 @@ public class RecipePreparationService
     }
 
     // Marcar que ya se terminó y descontar sus ingredientes del inventario de la semana
-    public async Task<RecipePreparation?> FinishAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<RecipePreparation?> FinishAsync(int userId, int id, CancellationToken cancellationToken = default)
     {
-        var preparation = await _recipePreparationRepository.GetByIdAsync(id, cancellationToken);
+        var preparation = await _recipePreparationRepository.GetByIdAsync(userId, id, cancellationToken);
         if (preparation is null)
         {
             return null;

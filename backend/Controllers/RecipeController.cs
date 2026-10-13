@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
@@ -7,6 +8,7 @@ using Stocked.Api.Services.Spoonacular;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/recipes")]
 public class RecipeController : ControllerBase
@@ -20,10 +22,16 @@ public class RecipeController : ControllerBase
         _recipeService = recipeService;
     }
 
-    // Buscar recetas por texto libre
+    // Buscar recetas por texto libre (no requiere sesión, no toca datos del usuario)
+    [AllowAnonymous]
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> Search([FromQuery] string query)
     {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return BadRequest("El parámetro 'query' es obligatorio.");
+        }
+
         var results = await _spoonacularClient.SearchRecipesAsync(query);
 
         var searchResults = results.Results.Select(result => new RecipeSearchResultDto
@@ -41,7 +49,7 @@ public class RecipeController : ControllerBase
     public async Task<ActionResult<RecipeDetailDto>> GetDetail(int externalId)
     {
         var recipe = await _recipeService.GetOrFetchRecipeAsync(externalId);
-        var isFavorite = await _recipeService.IsFavoriteAsync(recipe.Id);
+        var isFavorite = await _recipeService.IsFavoriteAsync(this.GetUserId(), recipe.Id);
 
         return Ok(MapToDetailDto(recipe, isFavorite));
     }
@@ -50,7 +58,7 @@ public class RecipeController : ControllerBase
     [HttpPost("{externalId:int}/favorite")]
     public async Task<IActionResult> AddFavorite(int externalId)
     {
-        await _recipeService.AddFavoriteAsync(externalId);
+        await _recipeService.AddFavoriteAsync(this.GetUserId(), externalId);
         return NoContent();
     }
 
@@ -58,7 +66,7 @@ public class RecipeController : ControllerBase
     [HttpDelete("{externalId:int}/favorite")]
     public async Task<IActionResult> RemoveFavorite(int externalId)
     {
-        await _recipeService.RemoveFavoriteAsync(externalId);
+        await _recipeService.RemoveFavoriteAsync(this.GetUserId(), externalId);
         return NoContent();
     }
 
@@ -66,8 +74,9 @@ public class RecipeController : ControllerBase
     [HttpGet("favorites")]
     public async Task<ActionResult<IEnumerable<RecipeWithMatchDto>>> GetFavorites()
     {
-        var recipes = await _recipeService.GetFavoriteRecipesAsync();
-        var matches = await _recipeService.GetMatchesAsync(recipes);
+        var userId = this.GetUserId();
+        var recipes = await _recipeService.GetFavoriteRecipesAsync(userId);
+        var matches = await _recipeService.GetMatchesAsync(userId, recipes);
 
         return Ok(recipes.Select(recipe => MapToMatchDto(recipe, matches[recipe.Id])));
     }
@@ -76,8 +85,9 @@ public class RecipeController : ControllerBase
     [HttpGet("recent")]
     public async Task<ActionResult<IEnumerable<RecipeWithMatchDto>>> GetRecent()
     {
+        var userId = this.GetUserId();
         var recipes = await _recipeService.GetRecentRecipesAsync();
-        var matches = await _recipeService.GetMatchesAsync(recipes);
+        var matches = await _recipeService.GetMatchesAsync(userId, recipes);
 
         return Ok(recipes.Select(recipe => MapToMatchDto(recipe, matches[recipe.Id])));
     }

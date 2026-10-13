@@ -1,8 +1,14 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Stocked.Api.Data;
 using Stocked.Api.Repositories;
+using Stocked.Api.Services.Auth;
 using Stocked.Api.Services.Calendar;
 using Stocked.Api.Services.Inventory;
 using Stocked.Api.Services.Pantry;
@@ -21,7 +27,29 @@ builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Más información sobre configurar Swagger/OpenAPI: https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Botón "Authorize" en Swagger UI para probar endpoints protegidos con el JWT
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Pegar el token obtenido en /api/auth/login (sin la palabra 'Bearer')"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddDbContext<StockedDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -37,6 +65,28 @@ builder.Services.AddHttpClient<SpoonacularClient>((serviceProvider, client) =>
     client.DefaultRequestHeaders.Add("x-api-key", options.ApiKey);
 });
 
+var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
+builder.Services.Configure<JwtOptions>(jwtSection);
+var jwtOptions = jwtSection.Get<JwtOptions>() ?? new JwtOptions();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IngredientRepository>();
 builder.Services.AddScoped<RecipeRepository>();
 builder.Services.AddScoped<FavoriteRecipeRepository>();
@@ -44,6 +94,7 @@ builder.Services.AddScoped<PantryRepository>();
 builder.Services.AddScoped<PantryAdjustmentRepository>();
 builder.Services.AddScoped<RecipePreparationRepository>();
 builder.Services.AddScoped<MealPlanEntryRepository>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PantryService>();
 builder.Services.AddScoped<RecipePreparationService>();
@@ -63,6 +114,24 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Traducir cualquier excepción sin capturar a una respuesta JSON consistente
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+        var isExternalApiFailure = exceptionFeature?.Error is HttpRequestException;
+        var statusCode = isExternalApiFailure ? StatusCodes.Status502BadGateway : StatusCodes.Status500InternalServerError;
+        var message = isExternalApiFailure
+            ? "No se pudo completar la solicitud a un servicio externo."
+            : "Ocurrió un error inesperado.";
+
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new { status = statusCode, message });
+    });
+});
+
 // Configurar el pipeline de peticiones HTTP
 if (app.Environment.IsDevelopment())
 {
@@ -74,6 +143,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(AngularDevClientPolicy);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

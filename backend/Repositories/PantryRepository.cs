@@ -13,20 +13,23 @@ public class PantryRepository
         _dbContext = dbContext;
     }
 
-    // Listar toda la despensa
-    public Task<List<PantryItem>> GetAllAsync(CancellationToken cancellationToken = default)
+    // Listar la despensa de un usuario
+    public Task<List<PantryItem>> GetAllAsync(int userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.PantryItems
             .Include(pantryItem => pantryItem.Ingredient)
+            .Where(pantryItem => pantryItem.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
-    // Buscar la fila de despensa de un ingrediente por su ID
-    public Task<PantryItem?> GetByExternalIdAsync(int externalId, CancellationToken cancellationToken = default)
+    // Buscar la fila de despensa de un ingrediente por su ID, dentro de la despensa de un usuario
+    public Task<PantryItem?> GetByExternalIdAsync(int userId, int externalId, CancellationToken cancellationToken = default)
     {
         return _dbContext.PantryItems
             .Include(pantryItem => pantryItem.Ingredient)
-            .FirstOrDefaultAsync(pantryItem => pantryItem.Ingredient.ExternalId == externalId, cancellationToken);
+            .FirstOrDefaultAsync(
+                pantryItem => pantryItem.UserId == userId && pantryItem.Ingredient.ExternalId == externalId,
+                cancellationToken);
     }
 
     // Guardar un ítem nuevo en la despensa

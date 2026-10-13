@@ -48,26 +48,26 @@ public class RecipeService
         return await _recipeRepository.AddAsync(recipe, cancellationToken);
     }
 
-    // Conocer si una receta está marcada como favorita
-    public async Task<bool> IsFavoriteAsync(int recipeId, CancellationToken cancellationToken = default)
+    // Conocer si una receta está marcada como favorita por un usuario
+    public async Task<bool> IsFavoriteAsync(int userId, int recipeId, CancellationToken cancellationToken = default)
     {
-        var favorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(recipeId, cancellationToken);
+        var favorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(userId, recipeId, cancellationToken);
         return favorite is not null;
     }
 
     // Marcar una receta como favorita
-    public async Task AddFavoriteAsync(int externalId, CancellationToken cancellationToken = default)
+    public async Task AddFavoriteAsync(int userId, int externalId, CancellationToken cancellationToken = default)
     {
         var recipe = await GetOrFetchRecipeAsync(externalId, cancellationToken);
-        var existingFavorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(recipe.Id, cancellationToken);
+        var existingFavorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(userId, recipe.Id, cancellationToken);
         if (existingFavorite is null)
         {
-            await _favoriteRecipeRepository.AddAsync(recipe.Id, cancellationToken);
+            await _favoriteRecipeRepository.AddAsync(userId, recipe.Id, cancellationToken);
         }
     }
 
     // Quitar una receta de favoritas
-    public async Task RemoveFavoriteAsync(int externalId, CancellationToken cancellationToken = default)
+    public async Task RemoveFavoriteAsync(int userId, int externalId, CancellationToken cancellationToken = default)
     {
         var recipe = await _recipeRepository.GetByExternalIdAsync(externalId, cancellationToken);
         if (recipe is null)
@@ -75,7 +75,7 @@ public class RecipeService
             return;
         }
 
-        var favorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(recipe.Id, cancellationToken);
+        var favorite = await _favoriteRecipeRepository.GetByRecipeIdAsync(userId, recipe.Id, cancellationToken);
         if (favorite is not null)
         {
             await _favoriteRecipeRepository.RemoveAsync(favorite, cancellationToken);
@@ -83,9 +83,9 @@ public class RecipeService
     }
 
     // Listar las recetas marcadas como favoritas
-    public Task<List<Recipe>> GetFavoriteRecipesAsync(CancellationToken cancellationToken = default)
+    public Task<List<Recipe>> GetFavoriteRecipesAsync(int userId, CancellationToken cancellationToken = default)
     {
-        return _favoriteRecipeRepository.GetAllRecipesAsync(cancellationToken);
+        return _favoriteRecipeRepository.GetAllRecipesAsync(userId, cancellationToken);
     }
 
     // Listar las recetas vistas recientemente
@@ -96,9 +96,9 @@ public class RecipeService
 
     // Conocer para cada receta, si se puede cocinar con lo que hay en la despensa
     public async Task<Dictionary<int, RecipeMatch>> GetMatchesAsync(
-        IEnumerable<Recipe> recipes, CancellationToken cancellationToken = default)
+        int userId, IEnumerable<Recipe> recipes, CancellationToken cancellationToken = default)
     {
-        var pantryItems = await _pantryRepository.GetAllAsync(cancellationToken);
+        var pantryItems = await _pantryRepository.GetAllAsync(userId, cancellationToken);
         var pantryIngredientIds = pantryItems.Select(pantryItem => pantryItem.IngredientId).ToHashSet();
 
         return recipes.ToDictionary(

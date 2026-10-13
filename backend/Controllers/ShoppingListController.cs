@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Services.Inventory;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/shopping-list")]
 public class ShoppingListController : ControllerBase
@@ -19,7 +21,7 @@ public class ShoppingListController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ShoppingListItemDto>>> GetShoppingList([FromQuery] DateOnly weekStart)
     {
-        var entries = await _shoppingListService.CalculateAsync(weekStart);
+        var entries = await _shoppingListService.CalculateAsync(this.GetUserId(), weekStart);
 
         var items = entries.Select(entry => new ShoppingListItemDto
         {

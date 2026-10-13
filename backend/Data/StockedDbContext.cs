@@ -36,9 +36,9 @@ public class StockedDbContext : DbContext
             .HasIndex(recipe => recipe.ExternalId)
             .IsUnique();
 
-        // Un ingrediente no puede tener más de una fila en la despensa
+        // Un ingrediente no puede tener más de una fila en la despensa de un mismo usuario
         modelBuilder.Entity<PantryItem>()
-            .HasIndex(pantryItem => pantryItem.IngredientId)
+            .HasIndex(pantryItem => new { pantryItem.UserId, pantryItem.IngredientId })
             .IsUnique();
 
         // Procedimiento de preparación (Pasos)
@@ -52,14 +52,5 @@ public class StockedDbContext : DbContext
             .WithMany()
             .HasForeignKey(preparation => preparation.MealPlanEntryId)
             .OnDelete(DeleteBehavior.SetNull);
-
-        // TEMP: Verificar la conectividad Postgres <-> API <-> Angular
-        modelBuilder.Entity<User>().HasData(new User
-        {
-            Id = 1,
-            Email = "prueba@stocked.dev",
-            DisplayName = "Usuario de Prueba",
-            CreatedAt = new DateTime(2026, 9, 20, 0, 0, 0, DateTimeKind.Utc)
-        });
     }
 }

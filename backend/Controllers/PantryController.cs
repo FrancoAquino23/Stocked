@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
@@ -5,6 +6,7 @@ using Stocked.Api.Services.Pantry;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/pantry-items")]
 public class PantryController : ControllerBase
@@ -20,7 +22,7 @@ public class PantryController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PantryItemDto>>> GetAll()
     {
-        var pantryItems = await _pantryService.GetAllPantryItemsAsync();
+        var pantryItems = await _pantryService.GetAllPantryItemsAsync(this.GetUserId());
         return Ok(pantryItems.Select(MapToDto));
     }
 
@@ -28,7 +30,7 @@ public class PantryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PantryItemDto>> Add([FromBody] AddPantryItemRequestDto request)
     {
-        var pantryItem = await _pantryService.AddPantryItemAsync(request.ExternalId);
+        var pantryItem = await _pantryService.AddPantryItemAsync(this.GetUserId(), request.ExternalId);
         return Ok(MapToDto(pantryItem));
     }
 
@@ -36,7 +38,8 @@ public class PantryController : ControllerBase
     [HttpPut("{externalId:int}")]
     public async Task<ActionResult<PantryItemDto>> Update(int externalId, [FromBody] UpdatePantryItemRequestDto request)
     {
-        var pantryItem = await _pantryService.UpdatePantryItemAsync(externalId, request.UsualQuantity, request.UsualUnit);
+        var pantryItem = await _pantryService.UpdatePantryItemAsync(
+            this.GetUserId(), externalId, request.UsualQuantity, request.UsualUnit);
         if (pantryItem is null)
         {
             return NotFound();
@@ -49,7 +52,7 @@ public class PantryController : ControllerBase
     [HttpDelete("{externalId:int}")]
     public async Task<IActionResult> Remove(int externalId)
     {
-        await _pantryService.RemovePantryItemAsync(externalId);
+        await _pantryService.RemovePantryItemAsync(this.GetUserId(), externalId);
         return NoContent();
     }
 

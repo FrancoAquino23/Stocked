@@ -13,29 +13,31 @@ public class FavoriteRecipeRepository
         _dbContext = dbContext;
     }
 
-    // Buscar si una receta ya está marcada como favorita
-    public Task<FavoriteRecipe?> GetByRecipeIdAsync(int recipeId, CancellationToken cancellationToken = default)
+    // Buscar si una receta ya está marcada como favorita por un usuario
+    public Task<FavoriteRecipe?> GetByRecipeIdAsync(int userId, int recipeId, CancellationToken cancellationToken = default)
     {
         return _dbContext.FavoriteRecipes
-            .FirstOrDefaultAsync(favorite => favorite.RecipeId == recipeId, cancellationToken);
+            .FirstOrDefaultAsync(favorite => favorite.UserId == userId && favorite.RecipeId == recipeId, cancellationToken);
     }
 
-    // Obtener las recetas y sus ingredientes marcadas como favoritas
-    public Task<List<Recipe>> GetAllRecipesAsync(CancellationToken cancellationToken = default)
+    // Obtener las recetas y sus ingredientes marcadas como favoritas por un usuario
+    public Task<List<Recipe>> GetAllRecipesAsync(int userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.FavoriteRecipes
             .Include(favorite => favorite.Recipe)
                 .ThenInclude(recipe => recipe.RecipeIngredients)
                     .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
+            .Where(favorite => favorite.UserId == userId)
             .Select(favorite => favorite.Recipe)
             .ToListAsync(cancellationToken);
     }
 
     // Marcar una receta como favorita
-    public async Task AddAsync(int recipeId, CancellationToken cancellationToken = default)
+    public async Task AddAsync(int userId, int recipeId, CancellationToken cancellationToken = default)
     {
         _dbContext.FavoriteRecipes.Add(new FavoriteRecipe
         {
+            UserId = userId,
             RecipeId = recipeId,
             CreatedAt = DateTime.UtcNow
         });

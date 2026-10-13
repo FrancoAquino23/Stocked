@@ -19,6 +19,11 @@ public class IngredientController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<IngredientSearchResultDto>>> Search([FromQuery] string query)
     {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return BadRequest("El parámetro 'query' es obligatorio.");
+        }
+
         var results = await _spoonacularClient.SearchIngredientsAsync(query);
 
         var searchResults = results.Select(result => new IngredientSearchResultDto

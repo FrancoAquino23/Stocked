@@ -13,36 +13,36 @@ public class RecipePreparationRepository
         _dbContext = dbContext;
     }
 
-    // Buscar una preparación por su ID
-    public Task<RecipePreparation?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    // Buscar una preparación por su ID, dentro de las preparaciones de un usuario
+    public Task<RecipePreparation?> GetByIdAsync(int userId, int id, CancellationToken cancellationToken = default)
     {
         return _dbContext.RecipePreparations
             .Include(preparation => preparation.Recipe)
                 .ThenInclude(recipe => recipe.RecipeIngredients)
                     .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
-            .FirstOrDefaultAsync(preparation => preparation.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(preparation => preparation.UserId == userId && preparation.Id == id, cancellationToken);
     }
 
-    // Preparaciones sin terminar (Pendiente o En curso)
-    public Task<List<RecipePreparation>> GetUnfinishedAsync(CancellationToken cancellationToken = default)
+    // Preparaciones sin terminar (Pendiente o En curso) de un usuario
+    public Task<List<RecipePreparation>> GetUnfinishedAsync(int userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.RecipePreparations
             .Include(preparation => preparation.Recipe)
                 .ThenInclude(recipe => recipe.RecipeIngredients)
                     .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
-            .Where(preparation => preparation.FinishedAt == null)
+            .Where(preparation => preparation.UserId == userId && preparation.FinishedAt == null)
             .ToListAsync(cancellationToken);
     }
 
-    // Preparaciones terminadas dentro de una ventana de fechas, alimentan "consumido"
+    // Preparaciones de un usuario terminadas dentro de una ventana de fechas, alimentan "consumido"
     public Task<List<RecipePreparation>> GetFinishedWithinWindowAsync(
-        DateTime windowStart, DateTime windowEnd, CancellationToken cancellationToken = default)
+        int userId, DateTime windowStart, DateTime windowEnd, CancellationToken cancellationToken = default)
     {
         return _dbContext.RecipePreparations
             .Include(preparation => preparation.Recipe)
                 .ThenInclude(recipe => recipe.RecipeIngredients)
                     .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
-            .Where(preparation => preparation.FinishedAt != null
+            .Where(preparation => preparation.UserId == userId && preparation.FinishedAt != null
                 && preparation.FinishedAt >= windowStart && preparation.FinishedAt <= windowEnd)
             .ToListAsync(cancellationToken);
     }

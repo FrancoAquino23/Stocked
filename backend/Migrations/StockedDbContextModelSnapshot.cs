@@ -36,9 +36,14 @@ namespace Stocked.Api.Migrations
                     b.Property<int>("RecipeId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FavoriteRecipes");
                 });
@@ -87,9 +92,14 @@ namespace Stocked.Api.Migrations
                     b.Property<int>("RecipeId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("MealPlanEntries");
                 });
@@ -118,9 +128,14 @@ namespace Stocked.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IngredientId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("PantryAdjustments");
                 });
@@ -136,6 +151,9 @@ namespace Stocked.Api.Migrations
                     b.Property<int>("IngredientId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal?>("UsualQuantity")
                         .HasColumnType("numeric");
 
@@ -144,7 +162,9 @@ namespace Stocked.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IngredientId")
+                    b.HasIndex("IngredientId");
+
+                    b.HasIndex("UserId", "IngredientId")
                         .IsUnique();
 
                     b.ToTable("PantryItems");
@@ -256,11 +276,16 @@ namespace Stocked.Api.Migrations
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MealPlanEntryId");
 
                     b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("RecipePreparations");
                 });
@@ -276,11 +301,15 @@ namespace Stocked.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("DisplayName")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -290,15 +319,6 @@ namespace Stocked.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2026, 9, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DisplayName = "Usuario de Prueba",
-                            Email = "prueba@stocked.dev"
-                        });
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.FavoriteRecipe", b =>
@@ -309,7 +329,15 @@ namespace Stocked.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Stocked.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Recipe");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.MealPlanEntry", b =>
@@ -320,7 +348,15 @@ namespace Stocked.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Stocked.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Recipe");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.PantryAdjustment", b =>
@@ -331,7 +367,15 @@ namespace Stocked.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Stocked.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Ingredient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.PantryItem", b =>
@@ -342,7 +386,15 @@ namespace Stocked.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Stocked.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Ingredient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.RecipeIngredient", b =>
@@ -377,9 +429,17 @@ namespace Stocked.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Stocked.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("MealPlanEntry");
 
                     b.Navigation("Recipe");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stocked.Api.Models.Recipe", b =>

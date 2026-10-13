@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
@@ -5,6 +6,7 @@ using Stocked.Api.Services.Preparations;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/recipe-preparations")]
 public class RecipePreparationController : ControllerBase
@@ -21,7 +23,7 @@ public class RecipePreparationController : ControllerBase
     public async Task<ActionResult<RecipePreparationDto>> Declare([FromBody] DeclareRecipePreparationRequestDto request)
     {
         var preparation = await _recipePreparationService.DeclareAsync(
-            request.ExternalId, request.Multiplier, request.MealPlanEntryId);
+            this.GetUserId(), request.ExternalId, request.Multiplier, request.MealPlanEntryId);
 
         return Ok(MapToDto(preparation));
     }
@@ -30,7 +32,7 @@ public class RecipePreparationController : ControllerBase
     [HttpPut("{id:int}/start")]
     public async Task<ActionResult<RecipePreparationDto>> Start(int id)
     {
-        var preparation = await _recipePreparationService.StartAsync(id);
+        var preparation = await _recipePreparationService.StartAsync(this.GetUserId(), id);
         if (preparation is null)
         {
             return NotFound();
@@ -43,7 +45,7 @@ public class RecipePreparationController : ControllerBase
     [HttpPut("{id:int}/finish")]
     public async Task<ActionResult<RecipePreparationDto>> Finish(int id)
     {
-        var preparation = await _recipePreparationService.FinishAsync(id);
+        var preparation = await _recipePreparationService.FinishAsync(this.GetUserId(), id);
         if (preparation is null)
         {
             return NotFound();

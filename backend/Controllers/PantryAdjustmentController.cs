@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
@@ -5,6 +6,7 @@ using Stocked.Api.Services.Pantry;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/pantry-adjustments")]
 public class PantryAdjustmentController : ControllerBase
@@ -21,7 +23,7 @@ public class PantryAdjustmentController : ControllerBase
     public async Task<ActionResult<PantryAdjustmentDto>> Report([FromBody] ReportPantryAdjustmentRequestDto request)
     {
         var adjustment = await _pantryService.ReportAdjustmentAsync(
-            request.ExternalId, request.Quantity, request.Unit, request.Reason);
+            this.GetUserId(), request.ExternalId, request.Quantity, request.Unit, request.Reason);
 
         return Ok(MapToDto(adjustment));
     }

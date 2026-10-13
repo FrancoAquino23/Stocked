@@ -13,13 +13,14 @@ public class PantryAdjustmentRepository
         _dbContext = dbContext;
     }
 
-    // Listar los ajustes dentro de una ventana de fechas
+    // Listar los ajustes de un usuario dentro de una ventana de fechas
     public Task<List<PantryAdjustment>> GetWithinWindowAsync(
-        DateTime windowStart, DateTime windowEnd, CancellationToken cancellationToken = default)
+        int userId, DateTime windowStart, DateTime windowEnd, CancellationToken cancellationToken = default)
     {
         return _dbContext.PantryAdjustments
             .Include(adjustment => adjustment.Ingredient)
-            .Where(adjustment => adjustment.CreatedAt >= windowStart && adjustment.CreatedAt <= windowEnd)
+            .Where(adjustment => adjustment.UserId == userId
+                && adjustment.CreatedAt >= windowStart && adjustment.CreatedAt <= windowEnd)
             .ToListAsync(cancellationToken);
     }
 

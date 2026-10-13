@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Models;
@@ -5,6 +6,7 @@ using Stocked.Api.Services.Calendar;
 
 namespace Stocked.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/meal-plan-entries")]
 public class MealPlanController : ControllerBase
@@ -20,7 +22,7 @@ public class MealPlanController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MealPlanEntryDto>>> GetAll()
     {
-        var entries = await _mealPlanService.GetAllAsync();
+        var entries = await _mealPlanService.GetAllAsync(this.GetUserId());
         return Ok(entries.Select(MapToDto));
     }
 
@@ -28,7 +30,7 @@ public class MealPlanController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<MealPlanEntryDto>> Add([FromBody] AddMealPlanEntryRequestDto request)
     {
-        var entry = await _mealPlanService.AddAsync(request.ExternalId, request.Date, request.MealSlot);
+        var entry = await _mealPlanService.AddAsync(this.GetUserId(), request.ExternalId, request.Date, request.MealSlot);
         return Ok(MapToDto(entry));
     }
 
@@ -36,7 +38,7 @@ public class MealPlanController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<MealPlanEntryDto>> Update(int id, [FromBody] UpdateMealPlanEntryRequestDto request)
     {
-        var entry = await _mealPlanService.UpdateAsync(id, request.Date, request.MealSlot);
+        var entry = await _mealPlanService.UpdateAsync(this.GetUserId(), id, request.Date, request.MealSlot);
         if (entry is null)
         {
             return NotFound();
@@ -49,7 +51,7 @@ public class MealPlanController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Remove(int id)
     {
-        await _mealPlanService.RemoveAsync(id);
+        await _mealPlanService.RemoveAsync(this.GetUserId(), id);
         return NoContent();
     }
 

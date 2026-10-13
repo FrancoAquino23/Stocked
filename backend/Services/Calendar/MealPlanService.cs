@@ -15,27 +15,27 @@ public class MealPlanService
         _mealPlanEntryRepository = mealPlanEntryRepository;
     }
 
-    // Listar el calendario completo
-    public Task<List<MealPlanEntry>> GetAllAsync(CancellationToken cancellationToken = default)
+    // Listar el calendario de un usuario
+    public Task<List<MealPlanEntry>> GetAllAsync(int userId, CancellationToken cancellationToken = default)
     {
-        return _mealPlanEntryRepository.GetAllAsync(cancellationToken);
+        return _mealPlanEntryRepository.GetAllAsync(userId, cancellationToken);
     }
 
     // Agendar una receta en el calendario
     public async Task<MealPlanEntry> AddAsync(
-        int externalId, DateOnly date, MealSlot mealSlot, CancellationToken cancellationToken = default)
+        int userId, int externalId, DateOnly date, MealSlot mealSlot, CancellationToken cancellationToken = default)
     {
         var recipe = await _recipeService.GetOrFetchRecipeAsync(externalId, cancellationToken);
-        var entry = new MealPlanEntry { RecipeId = recipe.Id, Date = date, MealSlot = mealSlot };
+        var entry = new MealPlanEntry { UserId = userId, RecipeId = recipe.Id, Date = date, MealSlot = mealSlot };
 
         return await _mealPlanEntryRepository.AddAsync(entry, cancellationToken);
     }
 
     // Mover una entrada agendada a otro día
     public async Task<MealPlanEntry?> UpdateAsync(
-        int id, DateOnly date, MealSlot mealSlot, CancellationToken cancellationToken = default)
+        int userId, int id, DateOnly date, MealSlot mealSlot, CancellationToken cancellationToken = default)
     {
-        var entry = await _mealPlanEntryRepository.GetByIdAsync(id, cancellationToken);
+        var entry = await _mealPlanEntryRepository.GetByIdAsync(userId, id, cancellationToken);
         if (entry is null)
         {
             return null;
@@ -49,9 +49,9 @@ public class MealPlanService
     }
 
     // Quitar una entrada del calendario
-    public async Task RemoveAsync(int id, CancellationToken cancellationToken = default)
+    public async Task RemoveAsync(int userId, int id, CancellationToken cancellationToken = default)
     {
-        var entry = await _mealPlanEntryRepository.GetByIdAsync(id, cancellationToken);
+        var entry = await _mealPlanEntryRepository.GetByIdAsync(userId, id, cancellationToken);
         if (entry is not null)
         {
             await _mealPlanEntryRepository.RemoveAsync(entry, cancellationToken);

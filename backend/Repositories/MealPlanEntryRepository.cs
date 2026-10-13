@@ -13,20 +13,21 @@ public class MealPlanEntryRepository
         _dbContext = dbContext;
     }
 
-    // Listar el calendario completo
-    public Task<List<MealPlanEntry>> GetAllAsync(CancellationToken cancellationToken = default)
+    // Listar el calendario de un usuario
+    public Task<List<MealPlanEntry>> GetAllAsync(int userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.MealPlanEntries
             .Include(entry => entry.Recipe)
+            .Where(entry => entry.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
-    // Buscar una entrada del calendario por su ID
-    public Task<MealPlanEntry?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    // Buscar una entrada del calendario por su ID, dentro del calendario de un usuario
+    public Task<MealPlanEntry?> GetByIdAsync(int userId, int id, CancellationToken cancellationToken = default)
     {
         return _dbContext.MealPlanEntries
             .Include(entry => entry.Recipe)
-            .FirstOrDefaultAsync(entry => entry.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(entry => entry.UserId == userId && entry.Id == id, cancellationToken);
     }
 
     // Agendar una receta nueva en el calendario
