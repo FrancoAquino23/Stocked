@@ -17,6 +17,9 @@ public class SpoonacularRecipeDetail
     [JsonPropertyName("summary")]
     public string Summary { get; set; } = string.Empty;
 
+    [JsonPropertyName("readyInMinutes")]
+    public int? ReadyInMinutes { get; set; }
+
     [JsonPropertyName("dishTypes")]
     public List<string> DishTypes { get; set; } = [];
 

@@ -22,26 +22,55 @@ public class RecipeController : ControllerBase
         _recipeService = recipeService;
     }
 
-    // Buscar recetas por texto libre (no requiere sesión, no toca datos del usuario)
+    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida
     [AllowAnonymous]
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> Search([FromQuery] string query)
+    public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> Search(
+        [FromQuery] string? query, [FromQuery] string? cuisine, [FromQuery] string? diet, [FromQuery] string? type)
     {
-        if (string.IsNullOrWhiteSpace(query))
+        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(cuisine)
+            && string.IsNullOrWhiteSpace(diet) && string.IsNullOrWhiteSpace(type))
         {
-            return BadRequest("El parámetro 'query' es obligatorio.");
+            return BadRequest("Se requiere 'query' o al menos un filtro (cuisine/diet/type).");
         }
 
-        var results = await _spoonacularClient.SearchRecipesAsync(query);
+        var results = await _spoonacularClient.SearchRecipesAsync(query ?? string.Empty, cuisine, diet, type);
 
         var searchResults = results.Results.Select(result => new RecipeSearchResultDto
         {
             ExternalId = result.Id,
             Name = result.Title,
-            ImageUrl = result.Image ?? string.Empty
+            ImageUrl = result.Image ?? string.Empty,
+            ReadyInMinutes = result.ReadyInMinutes,
+            DishTypes = result.DishTypes?.ToArray() ?? [],
+            Cuisines = result.Cuisines?.ToArray() ?? []
         });
 
         return Ok(searchResults);
+    }
+
+    // Recetas al azar para no arrancar la pantalla de búsqueda vacía
+    [AllowAnonymous]
+    [HttpGet("random")]
+    public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> GetRandom()
+    {
+        // Se piden algunas de más porque se descartan las que no traen imagen
+        var results = await _spoonacularClient.GetRandomRecipesAsync(15);
+
+        var randomResults = results.Recipes
+            .Where(result => !string.IsNullOrWhiteSpace(result.Image))
+            .Take(10)
+            .Select(result => new RecipeSearchResultDto
+            {
+                ExternalId = result.Id,
+                Name = result.Title,
+                ImageUrl = result.Image ?? string.Empty,
+                ReadyInMinutes = result.ReadyInMinutes,
+                DishTypes = result.DishTypes?.ToArray() ?? [],
+                Cuisines = result.Cuisines?.ToArray() ?? []
+            });
+
+        return Ok(randomResults);
     }
 
     // Ver el detalle completo de una receta
@@ -100,7 +129,11 @@ public class RecipeController : ControllerBase
             Name = recipe.Name,
             ImageUrl = recipe.ImageUrl,
             CanMake = match.CanMake,
-            MissingIngredientsCount = match.MissingIngredientsCount
+            MissingIngredientsCount = match.MissingIngredientsCount,
+            ReadyInMinutes = recipe.ReadyInMinutes,
+            DishTypes = recipe.DishTypes,
+            Diets = recipe.Diets,
+            Cuisines = recipe.Cuisines
         };
     }
 
@@ -112,6 +145,7 @@ public class RecipeController : ControllerBase
             Name = recipe.Name,
             Summary = recipe.Summary,
             ImageUrl = recipe.ImageUrl,
+            ReadyInMinutes = recipe.ReadyInMinutes,
             DishTypes = recipe.DishTypes,
             Diets = recipe.Diets,
             Cuisines = recipe.Cuisines,

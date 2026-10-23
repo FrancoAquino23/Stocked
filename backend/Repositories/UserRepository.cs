@@ -20,11 +20,24 @@ public class UserRepository
             .FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
     }
 
+    // Buscar un usuario por su ID
+    public Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Users
+            .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
+    }
+
     // Registrar un usuario nuevo
     public async Task<User> AddAsync(User user, CancellationToken cancellationToken = default)
     {
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return user;
+    }
+
+    // Guardar los cambios de un usuario ya existente
+    public Task UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

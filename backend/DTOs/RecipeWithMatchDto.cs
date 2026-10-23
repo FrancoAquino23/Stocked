@@ -8,4 +8,8 @@ public class RecipeWithMatchDto
     public string ImageUrl { get; set; } = string.Empty;
     public bool CanMake { get; set; }
     public int MissingIngredientsCount { get; set; }
+    public int? ReadyInMinutes { get; set; }
+    public string[] DishTypes { get; set; } = [];
+    public string[] Diets { get; set; } = [];
+    public string[] Cuisines { get; set; } = [];
 }

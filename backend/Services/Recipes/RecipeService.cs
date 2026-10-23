@@ -128,6 +128,7 @@ public class RecipeService
             Summary = detail.Summary,
             ImageUrl = detail.Image ?? string.Empty,
             Instructions = SerializeSteps(detail.AnalyzedInstructions),
+            ReadyInMinutes = detail.ReadyInMinutes,
             DishTypes = [.. detail.DishTypes],
             Diets = [.. detail.Diets],
             Cuisines = [.. detail.Cuisines],

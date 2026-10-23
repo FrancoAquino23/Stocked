@@ -13,12 +13,14 @@ public class AuthService
 {
     private readonly UserRepository _userRepository;
     private readonly JwtOptions _jwtOptions;
+    private readonly ILogger<AuthService> _logger;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public AuthService(UserRepository userRepository, IOptions<JwtOptions> jwtOptions)
+    public AuthService(UserRepository userRepository, IOptions<JwtOptions> jwtOptions, ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
         _jwtOptions = jwtOptions.Value;
+        _logger = logger;
     }
 
     // Registrar un usuario nuevo; null si el correo ya está en uso
@@ -29,6 +31,7 @@ public class AuthService
         var existingUser = await _userRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
         if (existingUser is not null)
         {
+            _logger.LogWarning("Intento de registro con un correo ya en uso: {Email}", normalizedEmail);
             return null;
         }
 
@@ -36,26 +39,48 @@ public class AuthService
         user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
         await _userRepository.AddAsync(user, cancellationToken);
+        _logger.LogInformation("Usuario nuevo registrado: {UserId} ({Email})", user.Id, normalizedEmail);
 
-        return new AuthResult(GenerateToken(user), user.Username, user.Email);
+        return new AuthResult(GenerateToken(user), user.Username, user.Email, user.PantryDayOfWeek, user.PantryTime);
     }
 
     // Iniciar sesión (null si el correo no existe o la contraseña no coincide)
     public async Task<AuthResult?> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByEmailAsync(email.ToLowerInvariant(), cancellationToken);
+        var normalizedEmail = email.ToLowerInvariant();
+        var user = await _userRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
         if (user is null)
         {
+            _logger.LogWarning("Intento de login con un correo que no existe: {Email}", normalizedEmail);
             return null;
         }
 
         var verification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
         if (verification == PasswordVerificationResult.Failed)
         {
+            _logger.LogWarning("Intento de login con contraseña incorrecta: {UserId} ({Email})", user.Id, normalizedEmail);
             return null;
         }
 
-        return new AuthResult(GenerateToken(user), user.Username, user.Email);
+        _logger.LogInformation("Login exitoso: {UserId} ({Email})", user.Id, normalizedEmail);
+        return new AuthResult(GenerateToken(user), user.Username, user.Email, user.PantryDayOfWeek, user.PantryTime);
+    }
+
+    // Guardar el día/hora de despensa
+    public async Task<AuthResult?> UpdatePantryScheduleAsync(
+        int userId, DayOfWeek dayOfWeek, TimeOnly time, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return null;
+        }
+
+        user.PantryDayOfWeek = dayOfWeek;
+        user.PantryTime = time;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return new AuthResult(GenerateToken(user), user.Username, user.Email, user.PantryDayOfWeek, user.PantryTime);
     }
 
     // Firmar un JWT con el ID del usuario como identificador

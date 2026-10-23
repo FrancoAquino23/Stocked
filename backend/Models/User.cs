@@ -11,4 +11,8 @@ public class User
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+
+    // Día/hora en que el usuario suele hacer despensa
+    public DayOfWeek? PantryDayOfWeek { get; set; }
+    public TimeOnly? PantryTime { get; set; }
 }

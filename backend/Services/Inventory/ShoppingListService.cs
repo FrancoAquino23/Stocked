@@ -43,7 +43,7 @@ public class ShoppingListService
     }
 
     // Una fila por cada ingrediente de cada receta preparada, multiplicada por cuántas veces se hizo
-    private static IEnumerable<IngredientAmount> ToIngredientAmounts(IEnumerable<RecipePreparation> preparations)
+    internal static IEnumerable<IngredientAmount> ToIngredientAmounts(IEnumerable<RecipePreparation> preparations)
     {
         return preparations.SelectMany(preparation => preparation.Recipe.RecipeIngredients.Select(recipeIngredient =>
             new IngredientAmount(

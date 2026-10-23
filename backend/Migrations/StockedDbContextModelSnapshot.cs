@@ -211,6 +211,9 @@ namespace Stocked.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("ReadyInMinutes")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Summary")
                         .IsRequired()
                         .HasColumnType("text");
@@ -304,6 +307,12 @@ namespace Stocked.Api.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("PantryDayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly?>("PantryTime")
+                        .HasColumnType("time without time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

@@ -12,6 +12,9 @@ public class Recipe
     // Procedimiento (Pasos numerados)
     public string Instructions { get; set; } = string.Empty;
 
+    // Tiempo de preparación en minutos
+    public int? ReadyInMinutes { get; set; }
+
     // Tipo de comida
     public string[] DishTypes { get; set; } = [];
 

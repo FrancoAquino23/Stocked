@@ -132,4 +132,60 @@ public class ShoppingListCalculatorTests
     {
         return new Models.PantryItem { IngredientId = ingredientId, UsualQuantity = usualQuantity, UsualUnit = usualUnit };
     }
+
+    // Con despensa de sobra, alcanza completo para lo solicitado
+    [Fact]
+    public void CalculateAffordability_AlcanzaCompleto_RegresaElMultiplierSolicitado()
+    {
+        var despensa = new[] { CrearPantryItem(LecheId, 2, "l") };
+        var porUnidad = new[] { new IngredientAmount(LecheId, "Leche", 200, "ml") };
+
+        var (affordable, uncertain) = ShoppingListCalculator.CalculateAffordability(
+            despensa, consumed: [], committed: [], porUnidad, requestedMultiplier: 3);
+
+        Assert.Equal(3, affordable);
+        Assert.Empty(uncertain);
+    }
+
+    // Con despensa insuficiente, el multiplier afectado se limita al máximo que sí alcanza
+    [Fact]
+    public void CalculateAffordability_AlcanzaParcial_LimitaAlMaximoDisponible()
+    {
+        var despensa = new[] { CrearPantryItem(LecheId, 500, "ml") };
+        var porUnidad = new[] { new IngredientAmount(LecheId, "Leche", 200, "ml") };
+
+        var (affordable, uncertain) = ShoppingListCalculator.CalculateAffordability(
+            despensa, consumed: [], committed: [], porUnidad, requestedMultiplier: 5);
+
+        Assert.Equal(2, affordable);
+        Assert.Empty(uncertain);
+    }
+
+    // Sin cantidad habitual capturada no hay con qué comparar, debe aparecer como incierto
+    [Fact]
+    public void CalculateAffordability_SinCantidadHabitualCapturada_ApareceComoIncierto()
+    {
+        var despensa = new[] { CrearPantryItem(LecheId, usualQuantity: null, usualUnit: null) };
+        var porUnidad = new[] { new IngredientAmount(LecheId, "Leche", 200, "ml") };
+
+        var (_, uncertain) = ShoppingListCalculator.CalculateAffordability(
+            despensa, consumed: [], committed: [], porUnidad, requestedMultiplier: 2);
+
+        Assert.Contains("Leche", uncertain);
+    }
+
+    // Lo ya comprometido por otras preparaciones de la misma semana reduce lo disponible
+    [Fact]
+    public void CalculateAffordability_LoYaComprometidoReduceLoDisponible()
+    {
+        var despensa = new[] { CrearPantryItem(LecheId, 1, "l") };
+        var comprometido = new[] { new IngredientAmount(LecheId, "Leche", 800, "ml") };
+        var porUnidad = new[] { new IngredientAmount(LecheId, "Leche", 200, "ml") };
+
+        var (affordable, uncertain) = ShoppingListCalculator.CalculateAffordability(
+            despensa, consumed: [], comprometido, porUnidad, requestedMultiplier: 3);
+
+        Assert.Equal(1, affordable);
+        Assert.Empty(uncertain);
+    }
 }

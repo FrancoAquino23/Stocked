@@ -54,6 +54,23 @@ public class RecipePreparationController : ControllerBase
         return Ok(MapToDto(preparation));
     }
 
+    // Calcular para cuántas de las veces solicitadas alcanza la despensa actual
+    [HttpGet("affordability")]
+    public async Task<ActionResult<RecipeAffordabilityDto>> CheckAffordability(
+        [FromQuery] int externalId, [FromQuery] int multiplier, [FromQuery] DateOnly weekStart)
+    {
+        var (affordable, fullyCovered, uncertain) = await _recipePreparationService
+            .CheckAffordabilityAsync(this.GetUserId(), externalId, multiplier, weekStart);
+
+        return Ok(new RecipeAffordabilityDto
+        {
+            RequestedMultiplier = multiplier,
+            AffordableMultiplier = affordable,
+            FullyCovered = fullyCovered,
+            UncertainIngredients = uncertain
+        });
+    }
+
     private static RecipePreparationDto MapToDto(RecipePreparation preparation)
     {
         return new RecipePreparationDto
@@ -70,9 +87,9 @@ public class RecipePreparationController : ControllerBase
     {
         if (preparation.FinishedAt is not null)
         {
-            return "Terminada";
+            return "Done";
         }
 
-        return preparation.StartedAt is not null ? "EnCurso" : "Pendiente";
+        return preparation.StartedAt is not null ? "InProgress" : "Pending";
     }
 }

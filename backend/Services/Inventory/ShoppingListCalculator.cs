@@ -55,6 +55,48 @@ public static class ShoppingListCalculator
         return results;
     }
 
+    // Calcular cuántas veces (de las solicitadas) alcanza la despensa para una sola receta
+    public static (int AffordableMultiplier, List<string> Uncertain) CalculateAffordability(
+        IEnumerable<PantryItem> pantryItems,
+        IEnumerable<IngredientAmount> consumed,
+        IEnumerable<IngredientAmount> committed,
+        IEnumerable<IngredientAmount> perUnitRequired,
+        int requestedMultiplier)
+    {
+        var pantryByIngredient = pantryItems.ToDictionary(pantryItem => pantryItem.IngredientId);
+        var uncertain = new List<string>();
+        var maxAffordable = requestedMultiplier;
+
+        foreach (var ingredient in perUnitRequired)
+        {
+            if (!pantryByIngredient.TryGetValue(ingredient.IngredientId, out var pantryItem) ||
+                pantryItem.UsualQuantity is null || pantryItem.UsualUnit is null)
+            {
+                uncertain.Add(ingredient.IngredientName);
+                continue;
+            }
+
+            var usualConverted = UnitConversionService.TryConvert(pantryItem.UsualQuantity.Value, pantryItem.UsualUnit, ingredient.Unit);
+            var consumedTotal = SumConvertedTo(consumed.Where(amount => amount.IngredientId == ingredient.IngredientId), ingredient.Unit);
+            var committedTotal = SumConvertedTo(committed.Where(amount => amount.IngredientId == ingredient.IngredientId), ingredient.Unit);
+
+            if (usualConverted is null || consumedTotal is null || committedTotal is null)
+            {
+                uncertain.Add(ingredient.IngredientName);
+                continue;
+            }
+
+            var available = usualConverted.Value - consumedTotal.Value - committedTotal.Value;
+            var affordableForThisIngredient = available <= 0 || ingredient.Quantity <= 0
+                ? 0
+                : (int)Math.Floor(available / ingredient.Quantity);
+
+            maxAffordable = Math.Min(maxAffordable, Math.Max(0, affordableForThisIngredient));
+        }
+
+        return (maxAffordable, uncertain);
+    }
+
     // Sumar a una sola unidad
     private static decimal? SumToCommonUnit(IEnumerable<IngredientAmount> amounts, out string? commonUnit)
     {

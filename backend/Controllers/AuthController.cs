@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stocked.Api.DTOs;
 using Stocked.Api.Services.Auth;
@@ -41,6 +42,20 @@ public class AuthController : ControllerBase
         return Ok(MapToDto(result));
     }
 
+    // Guardar el día/hora de despensa
+    [Authorize]
+    [HttpPut("pantry-schedule")]
+    public async Task<ActionResult<AuthResponseDto>> UpdatePantrySchedule([FromBody] UpdatePantryScheduleRequestDto request)
+    {
+        var result = await _authService.UpdatePantryScheduleAsync(this.GetUserId(), request.DayOfWeek, request.Time);
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(MapToDto(result));
+    }
+
     // Convertir el resultado del servicio en el contrato público de la API
     private static AuthResponseDto MapToDto(AuthResult result)
     {
@@ -48,7 +63,9 @@ public class AuthController : ControllerBase
         {
             Token = result.Token,
             Username = result.Username,
-            Email = result.Email
+            Email = result.Email,
+            PantryDayOfWeek = result.PantryDayOfWeek,
+            PantryTime = result.PantryTime
         };
     }
 }

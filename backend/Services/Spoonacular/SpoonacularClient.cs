@@ -12,11 +12,43 @@ public class SpoonacularClient
         _httpClient = httpClient;
     }
 
-    // Buscar recetas por texto libre
-    public Task<SpoonacularSearchResponse> SearchRecipesAsync(string query, CancellationToken cancellationToken = default)
+    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida
+    public Task<SpoonacularSearchResponse> SearchRecipesAsync(
+        string query, string? cuisine, string? diet, string? type, CancellationToken cancellationToken = default)
     {
-        var path = $"/recipes/complexSearch?query={Uri.EscapeDataString(query)}";
+        var queryParams = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            queryParams.Add($"query={Uri.EscapeDataString(query)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(cuisine))
+        {
+            queryParams.Add($"cuisine={Uri.EscapeDataString(cuisine)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(diet))
+        {
+            queryParams.Add($"diet={Uri.EscapeDataString(diet)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            queryParams.Add($"type={Uri.EscapeDataString(type)}");
+        }
+
+        queryParams.Add("addRecipeInformation=true");
+
+        var path = $"/recipes/complexSearch?{string.Join('&', queryParams)}";
         return GetAsync<SpoonacularSearchResponse>(path, cancellationToken);
+    }
+
+    // Recetas al azar, para que la pantalla de búsqueda no arranque vacía
+    public Task<SpoonacularRandomResponse> GetRandomRecipesAsync(int number, CancellationToken cancellationToken = default)
+    {
+        var path = $"/recipes/random?number={number}";
+        return GetAsync<SpoonacularRandomResponse>(path, cancellationToken);
     }
 
     // Obtener el detalle completo de una receta (Ingredientes y pasos incluidos)

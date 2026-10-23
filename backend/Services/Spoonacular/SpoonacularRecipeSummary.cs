@@ -13,4 +13,13 @@ public class SpoonacularRecipeSummary
 
     [JsonPropertyName("image")]
     public string? Image { get; set; }
+
+    [JsonPropertyName("readyInMinutes")]
+    public int? ReadyInMinutes { get; set; }
+
+    [JsonPropertyName("dishTypes")]
+    public List<string>? DishTypes { get; set; }
+
+    [JsonPropertyName("cuisines")]
+    public List<string>? Cuisines { get; set; }
 }

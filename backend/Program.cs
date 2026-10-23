@@ -126,6 +126,12 @@ app.UseExceptionHandler(errorApp =>
             ? "No se pudo completar la solicitud a un servicio externo."
             : "Ocurrió un error inesperado.";
 
+        if (exceptionFeature is not null)
+        {
+            var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("ExceptionHandler");
+            logger.LogError(exceptionFeature.Error, "Excepción sin capturar en {Path}", exceptionFeature.Path);
+        }
+
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
         await context.Response.WriteAsJsonAsync(new { status = statusCode, message });

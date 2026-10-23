@@ -6,6 +6,7 @@ namespace Stocked.Api.DTOs;
 public class RegisterRequestDto
 {
     [Required]
+    [MinLength(2)]
     public string Username { get; set; } = string.Empty;
 
     [Required]

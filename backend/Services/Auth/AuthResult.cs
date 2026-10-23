@@ -1,4 +1,4 @@
 namespace Stocked.Api.Services.Auth;
 
 // Resultado de un login/registro exitoso
-public record AuthResult(string Token, string Username, string Email);
+public record AuthResult(string Token, string Username, string Email, DayOfWeek? PantryDayOfWeek, TimeOnly? PantryTime);
