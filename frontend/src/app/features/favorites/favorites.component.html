@@ -1,0 +1,156 @@
+<section class="favorites-screen">
+  <h1>My favorites</h1>
+
+  <app-async-state
+    [state]="state()"
+    emptyMessage="You don't have any favorite recipes yet. Explore the recipe bank."
+    errorMessage="We couldn't load your favorites."
+    (retry)="load()"
+  >
+    <div class="filters-row">
+      <div class="filters-row__search">
+        <label for="favorites-search-input">Search</label>
+        <input
+          id="favorites-search-input"
+          type="search"
+          placeholder="Search by name…"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+
+      <div>
+        <label for="favorites-cuisine-filter">Cuisine</label>
+        <select
+          id="favorites-cuisine-filter"
+          [ngModel]="cuisine()"
+          (ngModelChange)="cuisine.set($event)"
+          [class.is-placeholder]="!cuisine()"
+        >
+          <option value="">Any</option>
+          @for (option of cuisineOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="favorites-diet-filter">Diet</label>
+        <select
+          id="favorites-diet-filter"
+          [ngModel]="diet()"
+          (ngModelChange)="diet.set($event)"
+          [class.is-placeholder]="!diet()"
+        >
+          <option value="">Any</option>
+          @for (option of dietOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="favorites-type-filter">Meal type</label>
+        <select
+          id="favorites-type-filter"
+          [ngModel]="type()"
+          (ngModelChange)="type.set($event)"
+          [class.is-placeholder]="!type()"
+        >
+          <option value="">Any</option>
+          @for (option of typeOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <button type="button" class="btn btn--tonal btn--sm" (click)="clearFilters()">Clear</button>
+
+      <button
+        type="button"
+        class="view-toggle-btn view-toggle-btn--first"
+        [class.is-active]="viewMode() === 'grid'"
+        [attr.aria-pressed]="viewMode() === 'grid'"
+        aria-label="Card view"
+        (click)="viewMode.set('grid')"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="view-toggle-btn view-toggle-btn--last"
+        [class.is-active]="viewMode() === 'list'"
+        [attr.aria-pressed]="viewMode() === 'list'"
+        aria-label="List view"
+        (click)="viewMode.set('list')"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="18" x2="20" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    @if (filteredRecipes().length > 0) {
+      @if (viewMode() === 'grid') {
+        <ul class="recipe-grid">
+          @for (recipe of filteredRecipes(); track recipe.externalId) {
+            <li>
+              <a [routerLink]="['/recipes', recipe.externalId]" class="recipe-card">
+                @if (recipe.imageUrl) {
+                  <img [src]="recipe.imageUrl" [alt]="recipe.name" />
+                }
+                <span class="recipe-card__name">{{ recipe.name }}</span>
+                @if (recipe.readyInMinutes) {
+                  <span class="recipe-card__badge recipe-card__badge--time recipe-card__badge--featured">
+                    {{ recipe.readyInMinutes }} min
+                  </span>
+                }
+                <div class="recipe-card__badges">
+                  @if (recipe.dishTypes[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--type">{{ recipe.dishTypes[0] }}</span>
+                  }
+                  @if (recipe.cuisines[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe.cuisines[0] }}</span>
+                  }
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <ul class="recipe-list">
+          @for (recipe of filteredRecipes(); track recipe.externalId) {
+            <li>
+              <a [routerLink]="['/recipes', recipe.externalId]" class="recipe-list-item">
+                @if (recipe.imageUrl) {
+                  <img [src]="recipe.imageUrl" [alt]="recipe.name" />
+                }
+                <span class="recipe-list-item__name">{{ recipe.name }}</span>
+                <div class="recipe-card__badges">
+                  @if (recipe.readyInMinutes) {
+                    <span class="recipe-card__badge recipe-card__badge--time">{{ recipe.readyInMinutes }} min</span>
+                  }
+                  @if (recipe.dishTypes[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--type">{{ recipe.dishTypes[0] }}</span>
+                  }
+                  @if (recipe.cuisines[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe.cuisines[0] }}</span>
+                  }
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    } @else if (hasActiveFilters()) {
+      <app-async-state state="empty" emptyMessage="No favorites match these filters." />
+    }
+  </app-async-state>
+</section>

@@ -1,0 +1,157 @@
+@if (loading()) {
+  <div class="recipe-detail__status" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading recipe…</p>
+  </div>
+} @else if (loadError()) {
+  <div class="recipe-detail__status" role="alert">
+    <p class="error-text">We couldn't load this recipe.</p>
+    <button type="button" class="btn btn--secondary" (click)="loadRecipe()">Retry</button>
+  </div>
+} @else if (recipe()) {
+  <article class="recipe-detail">
+    <button type="button" class="btn btn--secondary btn--sm recipe-detail__back" (click)="goBack()">
+      &larr; Back
+    </button>
+
+    <header class="recipe-detail__header">
+      @if (recipe()!.imageUrl) {
+        <img [src]="recipe()!.imageUrl" [alt]="recipe()!.name" />
+      }
+      <div>
+        <h1>{{ recipe()!.name }}</h1>
+        <div class="recipe-detail__meta">
+          @if (recipe()!.readyInMinutes) {
+            <span class="recipe-detail__meta-item">
+              Prep time:
+              <span class="recipe-card__badge recipe-card__badge--time">{{ recipe()!.readyInMinutes }} min</span>
+            </span>
+          }
+          @if (recipe()!.dishTypes[0]) {
+            <span class="recipe-detail__meta-item">
+              Meal type:
+              <span class="recipe-card__badge recipe-card__badge--type">{{ recipe()!.dishTypes[0] }}</span>
+            </span>
+          }
+          @if (recipe()!.cuisines[0]) {
+            <span class="recipe-detail__meta-item">
+              Cuisine:
+              <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe()!.cuisines[0] }}</span>
+            </span>
+          }
+        </div>
+        <button
+          type="button"
+          class="btn btn--sm"
+          [class.btn--primary]="recipe()!.isFavorite"
+          [class.btn--secondary]="!recipe()!.isFavorite"
+          (click)="toggleFavorite()"
+          [disabled]="togglingFavorite()"
+        >
+          {{ recipe()!.isFavorite ? '★ Remove from favorites' : '☆ Mark as favorite' }}
+        </button>
+      </div>
+    </header>
+
+    <hr class="recipe-detail__divider" />
+
+    <section>
+      <h2>Description</h2>
+      <div class="recipe-detail__summary" [innerHTML]="recipe()!.summary"></div>
+    </section>
+
+    <hr class="recipe-detail__divider" />
+
+    <section class="recipe-detail__ingredients-section">
+      <h2>Ingredients</h2>
+      <ul class="recipe-detail__ingredients">
+        @for (ingredient of recipe()!.ingredients; track ingredient.name) {
+          <li class="recipe-detail__ingredient">
+            @if (ingredient.imageUrl) {
+              <img [src]="ingredient.imageUrl" [alt]="ingredient.name" />
+            }
+            <span class="recipe-detail__ingredient-name">{{ ingredient.name | capitalize }}</span>
+            <span class="recipe-card__badge recipe-card__badge--quantity">
+              {{ ingredient.quantity }} {{ ingredient.unit }}
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <hr class="recipe-detail__divider" />
+
+    <section>
+      <h2>Steps</h2>
+      <ol class="recipe-detail__steps">
+        @for (step of recipe()!.steps; track step.number) {
+          <li [innerHTML]="step.description"></li>
+        }
+      </ol>
+    </section>
+
+    <section class="recipe-detail__preparation">
+      <h2>Are you going to make it?</h2>
+
+      <div class="recipe-detail__preparation-row">
+        <input
+          id="multiplier"
+          type="number"
+          min="1"
+          aria-label="How many times?"
+          [value]="multiplier()"
+          (change)="onMultiplierChange($any($event.target).value)"
+        />
+
+        <button type="button" class="btn btn--primary" (click)="onDeclareClick()" [disabled]="declaring()">
+          {{ declaring() ? 'Declaring…' : 'Declare' }}
+        </button>
+      </div>
+
+      @if (declaredMessage()) {
+        <p role="status" [class.error-text]="declareFailed()">{{ declaredMessage() }}</p>
+      }
+    </section>
+  </article>
+
+  @if (showAffordabilityWarning() && affordability()) {
+    <div class="modal-backdrop" (click)="closeAffordabilityWarning()">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="affordability-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="modal__title">
+          <span class="modal__icon" aria-hidden="true">⚠</span>
+          <h2 id="affordability-modal-title">You might not have enough</h2>
+        </div>
+
+        @if (affordability()!.affordableMultiplier < affordability()!.requestedMultiplier) {
+          <p>
+            With your current pantry, you only have enough for {{ affordability()!.affordableMultiplier }} of
+            {{ affordability()!.requestedMultiplier }}.
+          </p>
+        }
+        @if (affordability()!.uncertainIngredients.length > 0) {
+          <p>We couldn't confirm you have enough of:</p>
+          <ul class="modal__ingredient-list">
+            @for (ingredient of affordability()!.uncertainIngredients; track ingredient) {
+              <li>{{ ingredient }}</li>
+            }
+          </ul>
+          <p class="modal__hint">
+            Since we couldn't confirm these, check your <strong>Pantry</strong> tab to make sure their quantities
+            are up to date.
+          </p>
+        }
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--secondary" (click)="closeAffordabilityWarning()">Cancel</button>
+          <button type="button" class="btn btn--primary" (click)="confirmDeclareAnyway()">Continue</button>
+        </div>
+      </div>
+    </div>
+  }
+}

@@ -1,0 +1,36 @@
+<section class="recent-screen">
+  <h1>Recently viewed</h1>
+
+  <app-async-state
+    [state]="state()"
+    emptyMessage="You haven't viewed any recipes yet."
+    errorMessage="We couldn't load your recent recipes."
+    (retry)="load()"
+  >
+    <ul class="recipe-grid">
+      @for (recipe of recipes(); track recipe.externalId) {
+        <li>
+          <a [routerLink]="['/recipes', recipe.externalId]" class="recipe-card">
+            @if (recipe.imageUrl) {
+              <img [src]="recipe.imageUrl" [alt]="recipe.name" />
+            }
+            <span class="recipe-card__name">{{ recipe.name }}</span>
+            @if (recipe.readyInMinutes) {
+              <span class="recipe-card__badge recipe-card__badge--time recipe-card__badge--featured">
+                {{ recipe.readyInMinutes }} min
+              </span>
+            }
+            <div class="recipe-card__badges">
+              @if (recipe.dishTypes[0]) {
+                <span class="recipe-card__badge recipe-card__badge--type">{{ recipe.dishTypes[0] }}</span>
+              }
+              @if (recipe.cuisines[0]) {
+                <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe.cuisines[0] }}</span>
+              }
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </app-async-state>
+</section>

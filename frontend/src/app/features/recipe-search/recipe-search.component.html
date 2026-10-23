@@ -1,0 +1,91 @@
+<section class="recipe-search">
+  <h1>Search recipes</h1>
+
+  <div class="filters-row">
+    <div class="filters-row__search">
+      <label for="recipe-search-input">Search</label>
+      <input
+        id="recipe-search-input"
+        type="search"
+        placeholder="Search by name or ingredient…"
+        [value]="query()"
+        (input)="onQueryChange($any($event.target).value)"
+      />
+    </div>
+
+    <div>
+      <label for="cuisine-filter">Cuisine</label>
+      <select
+        id="cuisine-filter"
+        [ngModel]="cuisine()"
+        (ngModelChange)="cuisine.set($event); onFilterChange()"
+        [class.is-placeholder]="!cuisine()"
+      >
+        <option value="">Any</option>
+        @for (option of cuisineOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="diet-filter">Diet</label>
+      <select
+        id="diet-filter"
+        [ngModel]="diet()"
+        (ngModelChange)="diet.set($event); onFilterChange()"
+        [class.is-placeholder]="!diet()"
+      >
+        <option value="">Any</option>
+        @for (option of dietOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="type-filter">Meal type</label>
+      <select
+        id="type-filter"
+        [ngModel]="type()"
+        (ngModelChange)="type.set($event); onFilterChange()"
+        [class.is-placeholder]="!type()"
+      >
+        <option value="">Any</option>
+        @for (option of typeOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+
+    <button type="button" class="btn btn--tonal btn--sm" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <app-async-state [state]="state()" [emptyMessage]="emptyMessage" errorMessage="We couldn't search recipes.">
+    <ul class="recipe-grid">
+      @for (recipe of results(); track recipe.externalId) {
+        <li>
+          <a [routerLink]="['/recipes', recipe.externalId]" class="recipe-card">
+            @if (recipe.imageUrl) {
+              <img [src]="recipe.imageUrl" [alt]="recipe.name" />
+            }
+            <span class="recipe-card__name">{{ recipe.name }}</span>
+            @if (recipe.readyInMinutes) {
+              <span class="recipe-card__badge recipe-card__badge--time recipe-card__badge--featured">
+                {{ recipe.readyInMinutes }} min
+              </span>
+            }
+            <div class="recipe-card__badges">
+              @if (recipe.dishTypes[0]) {
+                <span class="recipe-card__badge recipe-card__badge--type">{{ recipe.dishTypes[0] }}</span>
+              }
+              @if (recipe.cuisines[0]) {
+                <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe.cuisines[0] }}</span>
+              }
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </app-async-state>
+</section>

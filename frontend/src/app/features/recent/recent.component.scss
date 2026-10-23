@@ -1,0 +1,13 @@
+// Pantalla (contenedor)
+.recent-screen {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  h1 {
+    margin-bottom: var(--space-xs);
+  }
+}

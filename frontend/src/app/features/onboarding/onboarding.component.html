@@ -1,0 +1,48 @@
+<div class="onboarding-screen">
+  <div class="onboarding-progress" role="status" [attr.aria-label]="'Step ' + step() + ' of 2'">
+    <span class="onboarding-progress__dot" [class.is-active]="step() === 1"></span>
+    <span class="onboarding-progress__dot" [class.is-active]="step() === 2"></span>
+  </div>
+
+  @if (step() === 1) {
+    <section class="onboarding-step">
+      <h1>What ingredients do you already have?</h1>
+      <p>Search and add them — you can keep editing your pantry later.</p>
+
+      <app-ingredient-picker (ingredientSelected)="onIngredientSelected($event)" />
+
+      @if (selectedIngredients().length > 0) {
+        <ul class="onboarding-step__selected">
+          @for (ingredient of selectedIngredients(); track ingredient.externalId) {
+            <li>{{ ingredient.name | capitalize }}</li>
+          }
+        </ul>
+      }
+
+      <button type="button" class="btn btn--primary" (click)="goToStep2()">Next</button>
+    </section>
+  } @else {
+    <section class="onboarding-step">
+      <h1>When do you usually go grocery shopping?</h1>
+      <p>We use this to remind you to check your shopping list before that day.</p>
+
+      @if (errorMessage()) {
+        <p class="error-banner" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <label for="day-of-week">Day of the week</label>
+      <select id="day-of-week" [ngModel]="dayOfWeek()" (ngModelChange)="dayOfWeek.set($event)">
+        @for (day of daysOfWeek; track day.value) {
+          <option [value]="day.value">{{ day.label }}</option>
+        }
+      </select>
+
+      <label for="pantry-time">Time</label>
+      <input id="pantry-time" type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" />
+
+      <button type="button" class="btn btn--primary" (click)="finish()" [disabled]="submitting()">
+        {{ submitting() ? 'Saving…' : 'Finish' }}
+      </button>
+    </section>
+  }
+</div>

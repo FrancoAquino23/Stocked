@@ -1,0 +1,64 @@
+<section class="pantry-screen">
+  <h1>My pantry</h1>
+
+  <app-ingredient-picker (ingredientSelected)="onIngredientSelected($event)" />
+
+  <app-async-state
+    [state]="state()"
+    emptyMessage="Your pantry is empty. Add ingredients to get started."
+    errorMessage="We couldn't load your pantry."
+    (retry)="load()"
+  >
+    <ul class="pantry-list">
+      @for (item of items(); track item.externalId) {
+        @if (pendingRemovalId() === item.externalId) {
+          <li class="pantry-list__item pantry-list__item--removed" role="status">
+            <span>Removed "<span class="pantry-list__name">{{ item.name | capitalize }}</span>" from your pantry.</span>
+            <button type="button" class="btn btn--secondary btn--sm" (click)="undoRemoval()">Undo</button>
+          </li>
+        } @else {
+          <li class="pantry-list__item">
+            @if (item.imageUrl) {
+              <img [src]="item.imageUrl" [alt]="item.name" />
+            }
+            <span class="pantry-list__name">{{ item.name | capitalize }}</span>
+
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              placeholder="Quantity"
+              [value]="item.usualQuantity ?? ''"
+              (change)="updateQuantity(item, $any($event.target).value, item.usualUnit ?? '')"
+            />
+            <select
+              [class.is-placeholder]="!item.usualUnit"
+              [ngModel]="item.usualUnit ?? ''"
+              (ngModelChange)="updateQuantity(item, (item.usualQuantity ?? '').toString(), $event)"
+            >
+              <option value="">Unit</option>
+              <option value="g">G</option>
+              <option value="kg">KG</option>
+              <option value="oz">OZ</option>
+              <option value="lb">LB</option>
+              <option value="ml">ML</option>
+              <option value="l">L</option>
+              <option value="cup">CUP</option>
+              <option value="tablespoon">TBSP</option>
+              <option value="teaspoon">TSP</option>
+            </select>
+
+            <button
+              type="button"
+              class="btn btn--danger-ghost btn--sm"
+              (click)="remove(item)"
+              [attr.aria-label]="'Remove ' + item.name + ' from the pantry'"
+            >
+              Remove
+            </button>
+          </li>
+        }
+      }
+    </ul>
+  </app-async-state>
+</section>

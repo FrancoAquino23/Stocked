@@ -1,0 +1,41 @@
+// Pantalla (contenedor, centra el formulario)
+.auth-screen {
+  min-height: calc(100vh - 3.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  background: radial-gradient(circle at top, var(--color-primary-soft) 0%, var(--color-bg) 60%);
+}
+
+// Tarjeta del formulario
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 24rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl) var(--space-lg);
+
+  h1 {
+    margin-bottom: var(--space-sm);
+  }
+
+  button {
+    margin-top: var(--space-sm);
+  }
+}
+
+// Pie del formulario (enlace a registro)
+.auth-form__footer {
+  margin: 0;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,79 @@
+// Pantalla (contenedor)
+.pantry-screen {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+
+  h1 {
+    margin-bottom: var(--space-xs);
+  }
+}
+
+// Lista de ingredientes de la despensa
+.pantry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.pantry-list__item {
+  display: grid;
+  grid-template-columns: 3rem 1fr 8rem 6rem auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+
+  img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    background: var(--color-surface-sunken);
+  }
+
+  input,
+  select {
+    width: 100%;
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Mismo renglón del ingrediente mientras dura la ventana de deshacer, sin reordenar la lista
+.pantry-list__item--removed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary-strong);
+  font-weight: 600;
+
+  .btn--secondary:not(:disabled):hover {
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
+    color: var(--color-primary-contrast);
+  }
+}
+
+.pantry-list__name {
+  font-weight: 600;
+}

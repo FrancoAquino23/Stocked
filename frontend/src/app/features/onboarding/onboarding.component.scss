@@ -1,0 +1,64 @@
+// Pantalla (contenedor)
+.onboarding-screen {
+  min-height: calc(100vh - 3.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl) var(--space-md);
+  background: radial-gradient(circle at top, var(--color-primary-soft) 0%, var(--color-bg) 60%);
+}
+
+// Indicador de progreso (paso 1 de 2)
+.onboarding-progress {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.onboarding-progress__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background var(--transition-fast);
+
+  &.is-active {
+    background: var(--color-primary);
+  }
+}
+
+// Tarjeta del paso actual (formulario)
+.onboarding-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 28rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl) var(--space-lg);
+
+  h1 {
+    margin-bottom: var(--space-xs);
+  }
+
+  select,
+  input[type='time'] {
+    width: 100%;
+  }
+
+  button {
+    margin-top: var(--space-sm);
+    align-self: flex-start;
+  }
+}
+
+// Lista de ingredientes ya seleccionados (paso 1)
+.onboarding-step__selected {
+  margin: 0;
+  padding-left: var(--space-lg);
+  color: var(--color-text-muted);
+}
+

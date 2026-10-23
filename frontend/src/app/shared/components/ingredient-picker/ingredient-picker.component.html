@@ -1,0 +1,26 @@
+<div class="ingredient-picker">
+  <label for="ingredient-picker-input">Search</label>
+  <input
+    id="ingredient-picker-input"
+    type="search"
+    placeholder="Search by ingredient name…"
+    (input)="onQueryChange($any($event.target).value)"
+  />
+
+  @if (hasSearched() || state() === 'error') {
+    <app-async-state [state]="state()" [emptyMessage]="emptyMessage" [errorMessage]="errorMessage" (retry)="retry()">
+      <ul class="ingredient-picker__results">
+        @for (result of results(); track result.externalId) {
+          <li>
+            <button type="button" (click)="onSelect(result)">
+              @if (result.imageUrl) {
+                <img [src]="result.imageUrl" [alt]="result.name" />
+              }
+              <span>{{ result.name | capitalize }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </app-async-state>
+  }
+</div>
