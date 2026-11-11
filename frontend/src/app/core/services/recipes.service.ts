@@ -76,4 +76,12 @@ export class RecipesService {
       catchError((error) => throwError(() => error)),
     );
   }
+
+  // Sugerir recetas ya cacheadas según lo que hay en la despensa actual
+  getSuggestions(): Observable<RecipeWithMatch[]> {
+    return this.http.get<RecipeWithMatch[]>(`${this.baseUrl}/suggestions`).pipe(
+      timeout(8000),
+      catchError((error) => throwError(() => error)),
+    );
+  }
 }

@@ -36,6 +36,7 @@ export interface RecipeIngredient {
   imageUrl: string;
   quantity: number;
   unit: string;
+  inPantry: boolean;
 }
 
 export interface RecipeDetail {

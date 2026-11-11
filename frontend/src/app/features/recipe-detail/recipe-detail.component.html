@@ -74,6 +74,11 @@
             <span class="recipe-card__badge recipe-card__badge--quantity">
               {{ ingredient.quantity }} {{ ingredient.unit }}
             </span>
+            @if (ingredient.inPantry) {
+              <span class="recipe-card__badge recipe-card__badge--in-pantry">In pantry</span>
+            } @else {
+              <span class="recipe-card__badge recipe-card__badge--missing">Missing</span>
+            }
           </li>
         }
       </ul>

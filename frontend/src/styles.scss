@@ -401,6 +401,12 @@ a {
   white-space: nowrap;
 }
 
+// Si el ingrediente ya está en la despensa — azul a propósito, distinto del verde de "cantidad" justo al lado
+.recipe-card__badge--in-pantry {
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
 // Tiempo de preparación
 .recipe-card__badge--time {
   background: var(--color-primary-soft);

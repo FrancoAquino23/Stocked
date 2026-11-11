@@ -88,6 +88,50 @@
       }
     </ul>
   </app-async-state>
+
+  @if (!hasSearched()) {
+    <section class="recipe-search__suggestions">
+      <h2>Recommended for you</h2>
+      <p class="recipe-search__suggestions-hint">Based on what's in your pantry right now.</p>
+
+      <app-async-state
+        [state]="suggestionsState()"
+        emptyMessage="Add ingredients to your pantry to get recommendations."
+        errorMessage="We couldn't load your recommendations."
+        (retry)="loadSuggestions()"
+      >
+        <ul class="recipe-grid">
+          @for (recipe of suggestions(); track recipe.externalId) {
+            <li>
+              <a [routerLink]="['/recipes', recipe.externalId]" class="recipe-card">
+                @if (recipe.imageUrl) {
+                  <img [src]="recipe.imageUrl" [alt]="recipe.name" />
+                }
+                <span class="recipe-card__name">{{ recipe.name }}</span>
+                @if (recipe.canMake) {
+                  <span class="recipe-card__badge recipe-card__badge--can-make recipe-card__badge--featured">
+                    You can make this
+                  </span>
+                } @else {
+                  <span class="recipe-card__badge recipe-card__badge--missing recipe-card__badge--featured">
+                    Missing {{ recipe.missingIngredientsCount }} ingredient{{ recipe.missingIngredientsCount === 1 ? '' : 's' }}
+                  </span>
+                }
+                <div class="recipe-card__badges">
+                  @if (recipe.dishTypes[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--type">{{ recipe.dishTypes[0] }}</span>
+                  }
+                  @if (recipe.cuisines[0]) {
+                    <span class="recipe-card__badge recipe-card__badge--cuisine">{{ recipe.cuisines[0] }}</span>
+                  }
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      </app-async-state>
+    </section>
+  }
 </section>
 
 <footer class="app-footer">

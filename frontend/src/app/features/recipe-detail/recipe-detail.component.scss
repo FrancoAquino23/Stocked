@@ -93,6 +93,18 @@
     object-fit: cover;
     background: var(--color-surface-sunken);
   }
+
+  // Ancho fijo para que la columna de estado (In pantry/Missing) quede alineada entre renglones
+  .recipe-card__badge--quantity {
+    min-width: 6rem;
+    text-align: center;
+  }
+
+  .recipe-card__badge--in-pantry,
+  .recipe-card__badge--missing {
+    min-width: 5rem;
+    text-align: center;
+  }
 }
 
 .recipe-detail__ingredient-name {

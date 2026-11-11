@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 
 import { RecipesService } from '../../core/services/recipes.service';
-import { RecipeSearchFilters, RecipeSearchResult } from '../../core/models/recipe.model';
+import { RecipeSearchFilters, RecipeSearchResult, RecipeWithMatch } from '../../core/models/recipe.model';
 import { AsyncViewState } from '../../shared/utils/async-view-state';
 import { AsyncStateComponent } from '../../shared/components/async-state/async-state.component';
 import { CUISINE_OPTIONS, DIET_OPTIONS, TYPE_OPTIONS } from '../../shared/utils/recipe-filter-options';
@@ -37,8 +37,12 @@ export class RecipeSearchComponent {
   diet = signal('');
   type = signal('');
 
+  suggestions = signal<RecipeWithMatch[]>([]);
+  suggestionsState = signal<AsyncViewState>('loading');
+
   constructor() {
     this.loadDefaultRecipes();
+    this.loadSuggestions();
 
     this.querySubject
       .pipe(
@@ -65,6 +69,18 @@ export class RecipeSearchComponent {
         this.state.set(recipes.length > 0 ? 'success' : 'empty');
       },
       error: () => this.state.set('error'),
+    });
+  }
+
+  // Sugerir recetas según la despensa actual — independiente de la búsqueda, solo se muestra sin ella
+  loadSuggestions(): void {
+    this.suggestionsState.set('loading');
+    this.recipesService.getSuggestions().subscribe({
+      next: (suggestions) => {
+        this.suggestions.set(suggestions);
+        this.suggestionsState.set(suggestions.length > 0 ? 'success' : 'empty');
+      },
+      error: () => this.suggestionsState.set('error'),
     });
   }
 

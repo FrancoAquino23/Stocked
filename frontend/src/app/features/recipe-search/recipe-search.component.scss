@@ -12,6 +12,23 @@
   }
 }
 
+// Sección de sugerencias basadas en la despensa, debajo del grid principal
+.recipe-search__suggestions {
+  margin-top: var(--space-lg);
+
+  // Mismo tamaño que el h1 de "Search recipes", para que se sienta al mismo nivel
+  h2 {
+    font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.25rem);
+    margin-bottom: var(--space-xs);
+  }
+}
+
+.recipe-search__suggestions-hint {
+  margin: 0 0 var(--space-md);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 // Pie de página — solo en esta pantalla (la principal), contenido de ejemplo sin función real
 .app-footer {
   max-width: 68rem;
