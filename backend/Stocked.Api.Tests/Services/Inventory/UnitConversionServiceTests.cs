@@ -62,6 +62,16 @@ public class UnitConversionServiceTests
         Assert.Equal(240, resultadoTazasAMililitros);
     }
 
+    // Spoonacular también regresa abreviaturas, no solo palabras completas
+    [Fact]
+    public void TryConvert_AbreviaturasDeSpoonacular_Convierte()
+    {
+        var resultado = UnitConversionService.TryConvert(3, "tsp", "tbsp");
+
+        Assert.NotNull(resultado);
+        Assert.Equal(1m, resultado.Value, precision: 2);
+    }
+
     // Volumen y peso no son convertibles entre sí
     [Fact]
     public void TryConvert_FamiliasDistintas_RegresaNull()
