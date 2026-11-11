@@ -1,0 +1,101 @@
+<section class="calendar-screen">
+  <h1>Calendar</h1>
+
+  <div class="calendar-layout">
+    <aside class="calendar-sidebar">
+      <section class="calendar-schedule">
+        <h2>When do you usually go grocery shopping?</h2>
+        <p class="calendar-hint">We'll use this to remind you what to buy.</p>
+
+        <div class="calendar-schedule__row">
+          <select [ngModel]="dayOfWeek()" (ngModelChange)="dayOfWeek.set($event)">
+            @for (day of daysOfWeek; track day.value) {
+              <option [value]="day.value">{{ day.label }}</option>
+            }
+          </select>
+
+          <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" />
+        </div>
+
+        <button type="button" class="btn btn--primary btn--sm calendar-schedule__save" (click)="saveSchedule()" [disabled]="savingSchedule()">
+          {{ savingSchedule() ? 'Saving…' : 'Save' }}
+        </button>
+
+        @if (scheduleSavedMessage()) {
+          <p role="status">{{ scheduleSavedMessage() }}</p>
+        }
+      </section>
+
+      <hr class="calendar-divider" />
+
+      <section class="calendar-shopping-list">
+        <h2>What you'll need</h2>
+        <p class="calendar-hint">
+          Based on what you've marked as made this week and your usual pantry amounts.
+        </p>
+
+        <app-async-state
+          [state]="displayState()"
+          emptyMessage="Nothing missing this week."
+          errorMessage="We couldn't calculate your shopping list."
+          (retry)="loadShoppingList()"
+        >
+          <ul class="calendar-shopping-list__items">
+            @for (item of visibleItems(); track item.ingredientName) {
+              <li>
+                <span class="calendar-shopping-list__name">{{ item.ingredientName | capitalize }}</span>
+                @if (item.uncertain) {
+                  <span class="recipe-card__badge recipe-card__badge--missing">Not sure</span>
+                }
+                <button type="button" class="btn btn--ghost btn--sm" (click)="dismiss(item.ingredientName)">
+                  Dismiss
+                </button>
+              </li>
+            }
+          </ul>
+        </app-async-state>
+
+        <p class="calendar-shopping-list__hint">
+          Think something's missing from this list? Update your usual amounts in the
+          <a routerLink="/pantry">Pantry</a> tab.
+        </p>
+      </section>
+    </aside>
+
+    <section class="calendar-month">
+      <div class="calendar-month__header">
+        <button type="button" class="calendar-month__nav" (click)="prevMonth()" aria-label="Previous month">
+          &larr;
+        </button>
+        <h2>{{ monthLabel() }}</h2>
+        <button type="button" class="calendar-month__nav" (click)="nextMonth()" aria-label="Next month">
+          &rarr;
+        </button>
+      </div>
+
+      <div class="calendar-month__grid">
+        @for (label of weekdayLabels; track label) {
+          <div class="calendar-month__weekday">{{ label }}</div>
+        }
+
+        @for (week of weeks(); track $index) {
+          @for (cell of week; track $index) {
+            <div
+              class="calendar-month__cell"
+              [class.is-empty]="!cell"
+              [class.is-pantry-day]="cell?.isPantryDay"
+              [class.is-today]="cell?.isToday"
+            >
+              @if (cell) {
+                <span class="calendar-month__day-number">{{ cell.day }}</span>
+                @if (cell.isPantryDay) {
+                  <span class="calendar-month__pantry-marker">Pantry day</span>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+    </section>
+  </div>
+</section>

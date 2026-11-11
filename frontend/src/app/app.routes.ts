@@ -41,6 +41,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/pantry/pantry.component').then((m) => m.PantryComponent),
   },
+  {
+    path: 'calendar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/calendar/calendar.component').then((m) => m.CalendarComponent),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'recipes' },
   { path: '**', redirectTo: 'recipes' },
 ];

@@ -19,6 +19,14 @@ export class RecipePreparationsService {
     );
   }
 
+  // Marcar una preparación como hecha y descontar sus ingredientes del inventario de la semana
+  finish(id: number): Observable<RecipePreparation> {
+    return this.http.put<RecipePreparation>(`${this.baseUrl}/${id}/finish`, {}).pipe(
+      timeout(8000),
+      catchError((error) => throwError(() => error)),
+    );
+  }
+
   // Consultar para cuántas de las veces solicitadas alcanza la despensa actual (nunca bloquea declarar)
   checkAffordability(externalId: number, multiplier: number): Observable<RecipeAffordability> {
     const weekStart = getCurrentWeekStart();

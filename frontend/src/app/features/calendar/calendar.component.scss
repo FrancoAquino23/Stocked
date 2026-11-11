@@ -1,0 +1,202 @@
+// Pantalla (contenedor)
+.calendar-screen {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+
+  h1 {
+    margin-bottom: var(--space-xs);
+  }
+}
+
+// Panel izquierdo (día de despensa + lista) + calendario de mes al centro
+.calendar-layout {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+
+  @media (max-width: 860px) {
+    flex-direction: column;
+  }
+}
+
+.calendar-sidebar {
+  flex: 0 0 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+
+  @media (max-width: 860px) {
+    flex: 1;
+    width: 100%;
+  }
+}
+
+// Configuración del día/hora de despensa
+.calendar-schedule {
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-md);
+  }
+}
+
+// Compartido por ambas secciones de la barra lateral (no solo .calendar-schedule)
+.calendar-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.calendar-schedule__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+
+  select {
+    width: 11rem;
+  }
+}
+
+.calendar-schedule__save {
+  margin-top: var(--space-md);
+}
+
+.calendar-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
+// Lista de compras calculada para la semana
+.calendar-shopping-list {
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-md);
+  }
+}
+
+.calendar-shopping-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+}
+
+.calendar-shopping-list__name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.calendar-shopping-list__hint {
+  margin-top: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+// Calendario de mes (centro)
+.calendar-month {
+  flex: 1;
+  min-width: 0;
+}
+
+.calendar-month__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+
+  h2 {
+    min-width: 10rem;
+    text-align: center;
+  }
+}
+
+.calendar-month__nav {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+}
+
+.calendar-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-xs);
+}
+
+.calendar-month__weekday {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-xs);
+}
+
+.calendar-month__cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+
+  &.is-empty {
+    visibility: hidden;
+  }
+
+  &.is-today {
+    border-color: var(--color-border);
+    font-weight: 600;
+  }
+
+  &.is-pantry-day {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
+}
+
+.calendar-month__day-number {
+  font-size: 0.95rem;
+}
+
+.calendar-month__pantry-marker {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-primary-strong);
+  text-align: center;
+  line-height: 1.1;
+}

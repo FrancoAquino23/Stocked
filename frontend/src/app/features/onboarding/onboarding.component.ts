@@ -7,16 +7,7 @@ import { PantryService } from '../../core/services/pantry.service';
 import { IngredientSearchResult } from '../../core/models/ingredient.model';
 import { IngredientPickerComponent } from '../../shared/components/ingredient-picker/ingredient-picker.component';
 import { CapitalizePipe } from '../../shared/pipes/capitalize.pipe';
-
-const DAYS_OF_WEEK = [
-  { value: 'Monday', label: 'Monday' },
-  { value: 'Tuesday', label: 'Tuesday' },
-  { value: 'Wednesday', label: 'Wednesday' },
-  { value: 'Thursday', label: 'Thursday' },
-  { value: 'Friday', label: 'Friday' },
-  { value: 'Saturday', label: 'Saturday' },
-  { value: 'Sunday', label: 'Sunday' },
-] as const;
+import { DAYS_OF_WEEK } from '../../shared/utils/days-of-week';
 
 @Component({
   selector: 'app-onboarding',
@@ -62,7 +53,7 @@ export class OnboardingComponent {
     this.errorMessage.set(null);
 
     this.authService
-      .completeOnboarding({ dayOfWeek: this.dayOfWeek(), time: `${this.time()}:00` })
+      .updatePantrySchedule({ dayOfWeek: this.dayOfWeek(), time: `${this.time()}:00` })
       .subscribe({
         next: () => {
           this.submitting.set(false);

@@ -617,3 +617,13 @@ a {
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }
+
+// Reduce el wrapper de 4 estados (pensado para pantalla completa) al ancho angosto del calendario — va aquí y no en calendar.component.scss porque el encapsulamiento de Angular no alcanza el DOM de un componente hijo
+.calendar-shopping-list .async-state--loading,
+.calendar-shopping-list .async-state--error,
+.calendar-shopping-list .async-state--empty {
+  min-height: 0;
+  padding: var(--space-md) 0;
+  max-width: 85%;
+  margin-right: auto;
+}

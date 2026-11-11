@@ -172,22 +172,25 @@ export class RecipeDetailComponent {
     }
   }
 
-  // Declarar la preparación de esta receta
+  // Declarar la preparación de esta receta y descontar sus ingredientes de una vez (un solo paso)
   declare(): void {
     this.declaring.set(true);
     this.declaredMessage.set(null);
     this.declareFailed.set(false);
 
-    this.recipePreparationsService.declare(this.externalId, this.multiplier()).subscribe({
-      next: (preparation) => {
-        this.declaring.set(false);
-        this.declaredMessage.set(`Preparation declared: ${preparation.status}.`);
-      },
-      error: () => {
-        this.declaring.set(false);
-        this.declareFailed.set(true);
-        this.declaredMessage.set('Could not declare the preparation. Please try again.');
-      },
-    });
+    this.recipePreparationsService
+      .declare(this.externalId, this.multiplier())
+      .pipe(switchMap((preparation) => this.recipePreparationsService.finish(preparation.id)))
+      .subscribe({
+        next: () => {
+          this.declaring.set(false);
+          this.declaredMessage.set('Marked as made — ingredients discounted from your pantry.');
+        },
+        error: () => {
+          this.declaring.set(false);
+          this.declareFailed.set(true);
+          this.declaredMessage.set('Could not declare the preparation. Please try again.');
+        },
+      });
   }
 }

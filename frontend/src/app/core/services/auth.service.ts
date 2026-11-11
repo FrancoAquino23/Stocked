@@ -16,6 +16,8 @@ export class AuthService {
   readonly username = computed(() => this.authState()?.username ?? null);
   readonly isAuthenticated = computed(() => !!this.authState()?.token);
   readonly hasCompletedOnboarding = computed(() => this.authState()?.pantryDayOfWeek != null);
+  readonly pantryDayOfWeek = computed(() => this.authState()?.pantryDayOfWeek ?? null);
+  readonly pantryTime = computed(() => this.authState()?.pantryTime ?? null);
 
   // Iniciar sesión
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -35,8 +37,8 @@ export class AuthService {
     );
   }
 
-  // Guardar el día/hora de despensa
-  completeOnboarding(request: UpdatePantryScheduleRequest): Observable<AuthResponse> {
+  // Guardar el día/hora de despensa — se usa tanto en el onboarding como para editarla después
+  updatePantrySchedule(request: UpdatePantryScheduleRequest): Observable<AuthResponse> {
     return this.http.put<AuthResponse>(`${environment.apiUrl}/auth/pantry-schedule`, request).pipe(
       timeout(8000),
       tap((response) => this.persist(response)),

@@ -11,3 +11,52 @@
     margin-bottom: var(--space-xs);
   }
 }
+
+// Pie de página — solo en esta pantalla (la principal), contenido de ejemplo sin función real
+.app-footer {
+  max-width: 68rem;
+  margin: var(--space-xl) auto 0;
+  padding: var(--space-lg) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.app-footer__copyright {
+  white-space: nowrap;
+}
+
+.app-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+
+  a {
+    color: var(--color-text-muted);
+    font-weight: 400;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.app-footer__social {
+  display: flex;
+  gap: var(--space-sm);
+
+  a {
+    display: flex;
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
