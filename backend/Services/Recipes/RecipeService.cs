@@ -9,6 +9,7 @@ namespace Stocked.Api.Services.Recipes;
 public class RecipeService
 {
     private const int MaxRecentRecipes = 20;
+    private const int MaxSuggestions = 5;
 
     private readonly SpoonacularClient _spoonacularClient;
     private readonly RecipeRepository _recipeRepository;
@@ -94,16 +95,36 @@ public class RecipeService
         return _recipeRepository.GetRecentAsync(MaxRecentRecipes, cancellationToken);
     }
 
+    // Sugerir recetas ya cacheadas, priorizando las que menos ingredientes le faltan a la despensa
+    public async Task<List<(Recipe Recipe, RecipeMatch Match)>> GetSuggestionsAsync(
+        int userId, CancellationToken cancellationToken = default)
+    {
+        var recipes = await _recipeRepository.GetAllAsync(cancellationToken);
+        var pantryIngredientIds = await GetPantryIngredientIdsAsync(userId, cancellationToken);
+
+        return recipes
+            .Select(recipe => (Recipe: recipe, Match: RecipeMatchCalculator.Calculate(recipe, pantryIngredientIds)))
+            .OrderBy(result => result.Match.MissingIngredientsCount)
+            .Take(MaxSuggestions)
+            .ToList();
+    }
+
     // Conocer para cada receta, si se puede cocinar con lo que hay en la despensa
     public async Task<Dictionary<int, RecipeMatch>> GetMatchesAsync(
         int userId, IEnumerable<Recipe> recipes, CancellationToken cancellationToken = default)
     {
-        var pantryItems = await _pantryRepository.GetAllAsync(userId, cancellationToken);
-        var pantryIngredientIds = pantryItems.Select(pantryItem => pantryItem.IngredientId).ToHashSet();
+        var pantryIngredientIds = await GetPantryIngredientIdsAsync(userId, cancellationToken);
 
         return recipes.ToDictionary(
             recipe => recipe.Id,
             recipe => RecipeMatchCalculator.Calculate(recipe, pantryIngredientIds));
+    }
+
+    // Conocer qué ingredientes tiene el usuario en su despensa (ignora cantidad)
+    public async Task<HashSet<int>> GetPantryIngredientIdsAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var pantryItems = await _pantryRepository.GetAllAsync(userId, cancellationToken);
+        return pantryItems.Select(pantryItem => pantryItem.IngredientId).ToHashSet();
     }
 
     // Armar la receta en memoria a partir del detalle de Spoonacular

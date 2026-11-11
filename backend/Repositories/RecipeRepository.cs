@@ -46,4 +46,13 @@ public class RecipeRepository
     {
         return _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    // Listar todas las recetas ya cacheadas (caché global, no por usuario)
+    public Task<List<Recipe>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Recipes
+            .Include(recipe => recipe.RecipeIngredients)
+                .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
+            .ToListAsync(cancellationToken);
+    }
 }

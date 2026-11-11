@@ -77,10 +77,20 @@ public class RecipeController : ControllerBase
     [HttpGet("{externalId:int}")]
     public async Task<ActionResult<RecipeDetailDto>> GetDetail(int externalId)
     {
+        var userId = this.GetUserId();
         var recipe = await _recipeService.GetOrFetchRecipeAsync(externalId);
-        var isFavorite = await _recipeService.IsFavoriteAsync(this.GetUserId(), recipe.Id);
+        var isFavorite = await _recipeService.IsFavoriteAsync(userId, recipe.Id);
+        var pantryIngredientIds = await _recipeService.GetPantryIngredientIdsAsync(userId);
 
-        return Ok(MapToDetailDto(recipe, isFavorite));
+        return Ok(MapToDetailDto(recipe, isFavorite, pantryIngredientIds));
+    }
+
+    // Sugerir recetas ya cacheadas que la despensa actual puede cubrir del todo o casi del todo
+    [HttpGet("suggestions")]
+    public async Task<ActionResult<IEnumerable<RecipeWithMatchDto>>> GetSuggestions()
+    {
+        var suggestions = await _recipeService.GetSuggestionsAsync(this.GetUserId());
+        return Ok(suggestions.Select(result => MapToMatchDto(result.Recipe, result.Match)));
     }
 
     // Marcar una receta como favorita
@@ -137,7 +147,7 @@ public class RecipeController : ControllerBase
         };
     }
 
-    private static RecipeDetailDto MapToDetailDto(Recipe recipe, bool isFavorite)
+    private static RecipeDetailDto MapToDetailDto(Recipe recipe, bool isFavorite, IReadOnlySet<int> pantryIngredientIds)
     {
         return new RecipeDetailDto
         {
@@ -157,7 +167,8 @@ public class RecipeController : ControllerBase
                 Name = recipeIngredient.Ingredient.Name,
                 ImageUrl = recipeIngredient.Ingredient.ImageUrl,
                 Quantity = recipeIngredient.Quantity,
-                Unit = recipeIngredient.Unit
+                Unit = recipeIngredient.Unit,
+                InPantry = pantryIngredientIds.Contains(recipeIngredient.IngredientId)
             })]
         };
     }

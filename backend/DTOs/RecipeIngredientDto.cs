@@ -7,4 +7,5 @@ public class RecipeIngredientDto
     public string ImageUrl { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
     public string Unit { get; set; } = string.Empty;
+    public bool InPantry { get; set; }
 }
