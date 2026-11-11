@@ -11,3 +11,8 @@
     margin-bottom: var(--space-xs);
   }
 }
+
+// Sin más filtros en esta pantalla, el toggle se recorre al borde derecho
+.recent-screen__toggle {
+  justify-content: flex-end;
+}

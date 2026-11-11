@@ -14,8 +14,22 @@
       <a routerLink="/pantry" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Pantry</a>
       <a routerLink="/calendar" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Calendar</a>
     </div>
-    <button type="button" class="app-nav__action" (click)="logout()">Logout</button>
+    <button type="button" class="app-nav__action" (click)="onLogoutClick()">Logout</button>
   </nav>
 }
 
 <router-outlet />
+
+@if (showLogoutConfirm()) {
+  <div class="modal-backdrop" (click)="cancelLogout()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" (click)="$event.stopPropagation()">
+      <h2 id="logout-modal-title">Log out?</h2>
+      <p>Are you sure you want to log out of Stocked?</p>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn--secondary" (click)="cancelLogout()">Cancel</button>
+        <button type="button" class="btn btn--primary" (click)="confirmLogout()">Log out</button>
+      </div>
+    </div>
+  </div>
+}

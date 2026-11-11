@@ -18,6 +18,7 @@ export class RecentComponent {
 
   recipes = signal<RecipeWithMatch[]>([]);
   state = signal<AsyncViewState>('loading');
+  viewMode = signal<'grid' | 'list'>('grid');
 
   constructor() {
     this.load();

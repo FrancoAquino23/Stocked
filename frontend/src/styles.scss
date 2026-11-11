@@ -551,6 +551,7 @@ a {
   position: fixed;
   inset: 0;
   background: rgba(42, 38, 33, 0.45);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
