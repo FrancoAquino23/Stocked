@@ -12,9 +12,10 @@ public class SpoonacularClient
         _httpClient = httpClient;
     }
 
-    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida
+    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida/intolerancias/tiempo máximo
     public Task<SpoonacularSearchResponse> SearchRecipesAsync(
-        string query, string? cuisine, string? diet, string? type, CancellationToken cancellationToken = default)
+        string query, string? cuisine, string? diet, string? type, string? intolerances, int? maxReadyTime,
+        CancellationToken cancellationToken = default)
     {
         var queryParams = new List<string>();
 
@@ -36,6 +37,16 @@ public class SpoonacularClient
         if (!string.IsNullOrWhiteSpace(type))
         {
             queryParams.Add($"type={Uri.EscapeDataString(type)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(intolerances))
+        {
+            queryParams.Add($"intolerances={Uri.EscapeDataString(intolerances)}");
+        }
+
+        if (maxReadyTime is not null)
+        {
+            queryParams.Add($"maxReadyTime={maxReadyTime.Value}");
         }
 
         queryParams.Add("addRecipeInformation=true");

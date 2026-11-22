@@ -22,19 +22,20 @@ public class RecipeController : ControllerBase
         _recipeService = recipeService;
     }
 
-    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida
+    // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida/intolerancias/tiempo máximo
     [AllowAnonymous]
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<RecipeSearchResultDto>>> Search(
-        [FromQuery] string? query, [FromQuery] string? cuisine, [FromQuery] string? diet, [FromQuery] string? type)
+        [FromQuery] string? query, [FromQuery] string? cuisine, [FromQuery] string? diet, [FromQuery] string? type,
+        [FromQuery] string? intolerances, [FromQuery] int? maxReadyTime)
     {
-        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(cuisine)
-            && string.IsNullOrWhiteSpace(diet) && string.IsNullOrWhiteSpace(type))
+        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(cuisine) && string.IsNullOrWhiteSpace(diet)
+            && string.IsNullOrWhiteSpace(type) && string.IsNullOrWhiteSpace(intolerances) && maxReadyTime is null)
         {
-            return BadRequest("Se requiere 'query' o al menos un filtro (cuisine/diet/type).");
+            return BadRequest("Se requiere 'query' o al menos un filtro (cuisine/diet/type/intolerances/maxReadyTime).");
         }
 
-        var results = await _spoonacularClient.SearchRecipesAsync(query ?? string.Empty, cuisine, diet, type);
+        var results = await _spoonacularClient.SearchRecipesAsync(query ?? string.Empty, cuisine, diet, type, intolerances, maxReadyTime);
 
         var searchResults = results.Results.Select(result => new RecipeSearchResultDto
         {
