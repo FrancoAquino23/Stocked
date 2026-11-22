@@ -18,7 +18,7 @@ using Stocked.Api.Services.Spoonacular;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string AngularDevClientPolicy = "AngularDevClient";
+const string AngularClientPolicy = "AngularClient";
 
 // Registrar los servicios de la aplicación
 
@@ -101,12 +101,14 @@ builder.Services.AddScoped<RecipePreparationService>();
 builder.Services.AddScoped<MealPlanService>();
 builder.Services.AddScoped<ShoppingListService>();
 
+// Dominio de Angular permitido — en Azure se configura con la Application Setting "Cors__AllowedOrigin"
+var allowedOrigin = builder.Configuration["Cors:AllowedOrigin"] ?? "http://localhost:4200";
+
 builder.Services.AddCors(options =>
 {
-    // Solo el servidor de desarrollo de Angular puede llamar a la API mientras no exista un origen de producción
-    options.AddPolicy(AngularDevClientPolicy, policy =>
+    options.AddPolicy(AngularClientPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigin)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -147,7 +149,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(AngularDevClientPolicy);
+app.UseCors(AngularClientPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
