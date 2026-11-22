@@ -10,10 +10,12 @@
   --color-primary-contrast: #ffffff;
   --color-accent: #c9682f;
   --color-accent-soft: #fbe9dc;
+  --color-accent-strong: #a6531f;
   --color-danger: #b3261e;
   --color-danger-soft: #fbeceb;
   --color-info: #3a6ea5;
   --color-info-soft: #e3ebf3;
+  --color-info-strong: #2d5680;
   --color-border: #e4dcc9;
   --color-focus: #1a5fb4;
 
@@ -165,6 +167,24 @@ a {
 
   &:hover {
     color: var(--color-primary-strong);
+  }
+}
+
+// Oculto hasta que recibe foco de teclado — primer elemento tabulable de la página
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: var(--space-md);
+  z-index: 200;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  transition: top var(--transition-fast);
+
+  &:focus-visible {
+    top: var(--space-md);
   }
 }
 
@@ -379,7 +399,7 @@ a {
 
 .recipe-card__badge--missing {
   background: var(--color-accent-soft);
-  color: var(--color-accent);
+  color: var(--color-accent-strong);
 }
 
 // Tipo de comida (dishType)
@@ -391,7 +411,7 @@ a {
 // Cocina (cuisine)
 .recipe-card__badge--cuisine {
   background: var(--color-info-soft);
-  color: var(--color-info);
+  color: var(--color-info-strong);
 }
 
 // Cantidad de un ingrediente
@@ -404,7 +424,7 @@ a {
 // Si el ingrediente ya está en la despensa — azul a propósito, distinto del verde de "cantidad" justo al lado
 .recipe-card__badge--in-pantry {
   background: var(--color-info-soft);
-  color: var(--color-info);
+  color: var(--color-info-strong);
 }
 
 // Tiempo de preparación
@@ -510,6 +530,29 @@ a {
   }
 }
 
+// Chip seleccionable — para filtros de selección múltiple que no caben en un <select>
+.chip-toggle {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  &.is-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+}
+
 // Fila de búsqueda + filtros
 .filters-row {
   display: flex;
@@ -602,7 +645,7 @@ a {
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--color-accent-soft);
-  color: var(--color-accent);
+  color: var(--color-accent-strong);
   font-size: 1.1rem;
 }
 

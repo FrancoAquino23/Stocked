@@ -10,7 +10,7 @@ export class RecipesService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/recipes`;
 
-  // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida
+  // Buscar recetas por texto libre, con filtros opcionales de cocina/dieta/tipo de comida/intolerancias/tiempo máximo
   search(query: string, filters?: Partial<RecipeSearchFilters>): Observable<RecipeSearchResult[]> {
     const params: Record<string, string> = { query };
     if (filters?.cuisine) {
@@ -21,6 +21,12 @@ export class RecipesService {
     }
     if (filters?.type) {
       params['type'] = filters.type;
+    }
+    if (filters?.intolerances?.length) {
+      params['intolerances'] = filters.intolerances.join(',');
+    }
+    if (filters?.maxReadyTime) {
+      params['maxReadyTime'] = filters.maxReadyTime.toString();
     }
 
     return this.http.get<RecipeSearchResult[]>(`${this.baseUrl}/search`, { params }).pipe(

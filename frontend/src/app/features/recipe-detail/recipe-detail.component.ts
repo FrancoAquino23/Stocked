@@ -9,6 +9,7 @@ import { RecipePreparationsService } from '../../core/services/recipe-preparatio
 import { RecipeDetail } from '../../core/models/recipe.model';
 import { RecipeAffordability } from '../../core/models/recipe-preparation.model';
 import { CapitalizePipe } from '../../shared/pipes/capitalize.pipe';
+import { trapFocus } from '../../shared/utils/focus-trap';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -39,6 +40,7 @@ export class RecipeDetailComponent {
   declaredMessage = signal<string | null>(null);
   declareFailed = signal(false);
   showAffordabilityWarning = signal(false);
+  readonly trapFocus = trapFocus;
 
   constructor() {
     this.loadRecipe();

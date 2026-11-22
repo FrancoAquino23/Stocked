@@ -127,6 +127,8 @@
         aria-modal="true"
         aria-labelledby="affordability-modal-title"
         (click)="$event.stopPropagation()"
+        (keydown)="trapFocus($event, affordabilityModal)"
+        #affordabilityModal
       >
         <div class="modal__title">
           <span class="modal__icon" aria-hidden="true">⚠</span>
@@ -153,7 +155,7 @@
         }
 
         <div class="modal__actions">
-          <button type="button" class="btn btn--secondary" (click)="closeAffordabilityWarning()">Cancel</button>
+          <button type="button" class="btn btn--secondary" autofocus (click)="closeAffordabilityWarning()">Cancel</button>
           <button type="button" class="btn btn--primary" (click)="confirmDeclareAnyway()">Continue</button>
         </div>
       </div>

@@ -8,13 +8,18 @@
         <p class="calendar-hint">We'll use this to remind you what to buy.</p>
 
         <div class="calendar-schedule__row">
-          <select [ngModel]="dayOfWeek()" (ngModelChange)="dayOfWeek.set($event)">
+          <select aria-label="Pantry day of week" [ngModel]="dayOfWeek()" (ngModelChange)="dayOfWeek.set($event)">
             @for (day of daysOfWeek; track day.value) {
               <option [value]="day.value">{{ day.label }}</option>
             }
           </select>
 
-          <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" />
+          <input
+            type="time"
+            aria-label="Pantry time"
+            [ngModel]="time()"
+            (ngModelChange)="time.set($event)"
+          />
         </div>
 
         <button type="button" class="btn btn--primary btn--sm calendar-schedule__save" (click)="saveSchedule()" [disabled]="savingSchedule()">

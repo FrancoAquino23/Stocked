@@ -12,6 +12,24 @@
   }
 }
 
+#max-ready-time-filter {
+  width: 7rem;
+}
+
+// Selección múltiple de intolerancias — no cabe en un <select> de un solo valor
+.recipe-search__intolerances {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.recipe-search__intolerances-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
 // Sección de sugerencias basadas en la despensa, debajo del grid principal
 .recipe-search__suggestions {
   margin-top: var(--space-lg);

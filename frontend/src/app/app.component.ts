@@ -2,6 +2,7 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from './core/services/auth.service';
+import { trapFocus } from './shared/utils/focus-trap';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class AppComponent {
 
   title = 'Stocked';
   showLogoutConfirm = signal(false);
+  readonly trapFocus = trapFocus;
 
   // Pedir confirmación antes de cerrar sesión
   onLogoutClick(): void {

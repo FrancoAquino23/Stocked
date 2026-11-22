@@ -12,6 +12,8 @@ export interface RecipeSearchFilters {
   cuisine: string;
   diet: string;
   type: string;
+  intolerances: string[];
+  maxReadyTime: number | null;
 }
 
 export interface RecipeWithMatch {

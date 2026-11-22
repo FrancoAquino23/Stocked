@@ -28,11 +28,13 @@
               min="0"
               step="0.1"
               placeholder="Quantity"
+              [attr.aria-label]="'Usual quantity for ' + item.name"
               [value]="item.usualQuantity ?? ''"
               (change)="updateQuantity(item, $any($event.target).value, item.usualUnit ?? '')"
             />
             <select
               [class.is-placeholder]="!item.usualUnit"
+              [attr.aria-label]="'Usual unit for ' + item.name"
               [ngModel]="item.usualUnit ?? ''"
               (ngModelChange)="updateQuantity(item, (item.usualQuantity ?? '').toString(), $event)"
             >
